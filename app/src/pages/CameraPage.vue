@@ -85,17 +85,7 @@
           class="relative-position"
           style="width: fit-content;"
         >
-          <CensorControl
-            @update="updateCensorShield"
-            @toggle="censorshieldToggled"
-          />
-          <canvas
-            v-show="censorSettings && censorshieldEnabled"
-            style="max-width: 100%; background-color: aqua;"
-            ref="canvasTag"
-          />
           <video
-            v-show="censorSettings && !censorshieldEnabled"
             ref="videoTag"
             autoplay
             style="max-width: 100%; background-color: darkcyan;"
@@ -107,7 +97,6 @@
 </template>
 
 <script setup lang="ts">
-import CensorControl from 'src/components/CensorControl.vue';
 import { ref, watch, onUnmounted, onBeforeUnmount } from 'vue';
 import { useSoupStore } from 'src/stores/soupStore';
 import DevicePicker from 'src/components/DevicePicker.vue';
@@ -126,7 +115,6 @@ const peer = usePeerClient();
 const soupStore = useSoupStore();
 
 const videoTag = ref<HTMLVideoElement>();
-const canvasTag = ref<HTMLCanvasElement>();
 
 const pickedVideoDevice = ref<MediaDeviceInfo>();
 interface VideoInfo {
@@ -323,7 +311,6 @@ async function onVideoPicked (deviceInfo: MediaDeviceInfo) {
   videoInfo.value = { width, height, frameRate, aspectRatio };
 
   videoTag.value.srcObject = videoStream;
-  setCanvasPropsFromVideoInfo();
 
   handleVideoStreamChanged();
 }
@@ -366,26 +353,14 @@ let originalVideoTrack: MediaStreamTrack;
 async function handleVideoStreamChanged () {
   // Ok. The videoStream was changed. we must update the producer and/or the canvas accordingly
 
-  if (!censorSettings.value) {
-    throw new Error('censorSettings is undefined');
-  }
   // We already have a producer created.
   if (videoProducerId) {
     originalVideoTrack.stop();
     originalVideoTrack = videoStream.getVideoTracks()[0];
-    if (!censorshieldEnabled.value) {
       peer.replaceProducerTrack(videoProducerId, originalVideoTrack.clone());
-    }
   } else {
     originalVideoTrack = videoStream.getVideoTracks()[0];
-    let clonedTrack = originalVideoTrack.clone();
-    if (censorshieldEnabled.value) {
-      attachVideoToCanvas();
-      setCanvasPropsFromVideoInfo();
-      if (!canvasStream) throw new Error('canvasStream undefined! cant use it for producer');
-      // stream = canvasStream;
-      clonedTrack = canvasStream.getVideoTracks()[0];
-    }
+    const clonedTrack = originalVideoTrack.clone();
 
     videoProducerId = await peer.produce(clonedTrack);
     console.log('produce returned: ', videoProducerId);
@@ -395,91 +370,6 @@ async function handleVideoStreamChanged () {
     peer.assignMainProducerToRoom(soupStore.clientId, videoProducerId, soupStore.clientState.roomId, 'video');
     // startProducing();
   }
-}
-
-function setCanvasPropsFromVideoInfo () {
-  if (!canvasTag.value) throw new Error('no canvas tag available');
-  if (!videoInfo.value) throw new Error('videoInfo is undefined!');
-  const { width, height } = videoInfo.value;
-  if (!width || !height) throw new Error('couldnt get width and/or height from videotrack');
-  canvasTag.value.width = width;
-  canvasTag.value.height = height;
-}
-
-type CensorUpdateHandler = Exclude<(InstanceType<typeof CensorControl>)['onUpdate'], undefined>;
-const censorSettings = ref<Parameters<CensorUpdateHandler>[0]>();
-const updateCensorShield: CensorUpdateHandler = (shieldState) => {
-  console.log('censorshield emitted');
-  censorSettings.value = shieldState;
-};
-
-const censorshieldEnabled = ref<boolean>(false);
-const censorshieldToggled = (enabled: boolean) => {
-  censorshieldEnabled.value = enabled;
-  if (censorshieldEnabled.value) {
-    attachVideoToCanvas();
-    if (videoProducerId && canvasStream) {
-      peer.replaceProducerTrack(videoProducerId, canvasStream.getVideoTracks()[0]);
-    }
-  } else {
-    if (videoProducerId) {
-      const clonedVideoTrack = originalVideoTrack.clone();
-      peer.replaceProducerTrack(videoProducerId, clonedVideoTrack);
-    }
-    detachVideoFromCanvas();
-  }
-};
-
-let canvasStream: MediaStream |undefined;
-let drawToCanvas = false;
-function attachVideoToCanvas () {
-  drawToCanvas = true;
-  const vTag = videoTag.value;
-  const cTag = canvasTag.value;
-  const ctx = cTag?.getContext('2d', { alpha: false });
-  if (!cTag || !vTag || !ctx) {
-    throw new Error('canvas or video tag not available');
-  }
-  const update = () => {
-    let coverStart = 0;
-    let coverWidth = 100;
-    let inverted = false;
-    if (censorSettings.value) {
-      coverStart = censorSettings.value.range.min;
-      coverWidth = censorSettings.value.range.max;
-      inverted = censorSettings.value.inverted;
-    }
-    const xStart = Math.floor(cTag.width * (coverStart * 0.01));
-    const xWidth = Math.floor(cTag.width * ((coverWidth - coverStart) * 0.01));
-
-    // ctx.filter = 'blur(15px)';
-    // ctx.drawImage(vTag, 0, 0);
-    // const imageData = ctx.getImageData(xStart, 0, xWidth, cTag.height);
-    // ctx.filter = 'none';
-
-    ctx.drawImage(vTag, 0, 0);
-
-    if (inverted) {
-      ctx.fillRect(0, 0, xStart, cTag.height);
-      ctx.fillRect(xStart + xWidth, 0, cTag.width, cTag.height);
-    } else {
-      ctx.fillRect(xStart, 0, xWidth, cTag.height);
-    }
-    // ctx.putImageData(imageData, xStart, 0);
-    if (drawToCanvas) {
-      requestAnimationFrame(update);
-    }
-  };
-  requestAnimationFrame(update);
-
-  // const capturedStream = cTag.captureStream();
-  // if(!capturedStream) throw new Error('failed to capture stream from canvas!');
-  canvasStream = cTag.captureStream();
-}
-
-function detachVideoFromCanvas () {
-  drawToCanvas = false;
-  canvasStream = undefined;
 }
 
 async function enterGatheringAndRoom (gatheringName: string, roomName: string) {
