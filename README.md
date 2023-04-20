@@ -1,4 +1,12 @@
-# Inclubit 360 v2
+# Robbit v2
+Robbit is an open source system for telepresence robots which are cheap, easy to build and easy to use. The original targetusers were students who cannot attend school physically, but other areas where the system can be used have been explored as well, such as for visiting museums.
+
+This version 2 aims to become a full overhaul of the [original system](https://github.com/Dealerpriest/robbit), which had gotten too far outdated. It is based on a fork of [Inclubit 360 v2](https://github.com/inclubit/inclubit-2).
+
+Below this line the readme is a mix of Inclubit and Robbit. This will be updated over time as the rework progresses.
+
+---
+
 Inclubit 360 is a solution for enabling real-time communication between a 360 camera and a VR-headset. The system is implemented using web technologies. The client side consists of a website running in a browser.
 This repository is version 2 of inclubit which expands on the features available in [version 1](https://github.com/Dealerpriest/inclubit-360).
 New features in version 2 includes:
@@ -115,7 +123,7 @@ cd ~
 ```
 Clone the repository from github:
 ```
-git clone https://github.com/inclubit/inclubit-2.git
+git clone https://github.com/nielsswinkels/robbit-2
 ```
 - Create a .env file according to the instructions in the [.env section](#.env) above.
 
