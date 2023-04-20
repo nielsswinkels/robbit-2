@@ -1,9 +1,9 @@
 {
   "name": "app",
-  "version": "0.0.1",
-  "description": "360 video streaming to virtual reality using web technologies",
-  "productName": "Inclubit 360",
-  "author": "Gunnar Oledal <gunnar.oledal@gmail.com>",
+  "version": "2.0.0",
+  "description": "Telepresence robot",
+  "productName": "Robbit",
+  "author": "Gunnar Oledal <gunnar.oledal@gmail.com> & Niels Stor Swinkels <niels.sw@gmail.com>",
   "private": true,
   "scripts": {
     "dev": "quasar dev",

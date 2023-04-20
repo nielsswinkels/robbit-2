@@ -7,7 +7,7 @@
       id="main-title"
       class="column no-wrap items-end"
     >
-      <h1>Inclubit36<span>0</span></h1>
+      <h1>Robbit</h1>
       <h2>Logga in</h2>
     </div>
     <LoginBox
