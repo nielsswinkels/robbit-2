@@ -34,14 +34,15 @@
     class="column no-wrap"
   >
     <div
-      id="vr-container"
-      class="col-grow bg-pink relative-position"
+      id="video-container"
+      class="col"
     >
       <video
-        v-show="false"
+        v-show="true"
         id="main-video"
         autoplay
         ref="videoTag"
+        class=""
       />
       <video
         v-show="screenshareWindowMode !== 'vr'"
@@ -50,7 +51,13 @@
         autoplay
         ref="screenTag"
       />
+    </div>
+    <!-- <div
+      id="vr-container"
+      class="col-grow bg-pink relative-position"
+    >
       <a-scene
+        v-show="false"
         embedded
         cursor="rayOrigin: mouse; fuse: false;"
         raycaster="objects: .clickable"
@@ -101,9 +108,9 @@
           raycaster="objects: .raycastable"
         />
       </a-scene>
-    </div>
+    </div> -->
     <BottomPanel
-      class="bg-dark"
+      class="col-shrink bg-dark"
       id="bottom-panel"
     >
       <QToolbarTitle> Rumsnamn: <span class="text-info">{{ soupStore.roomState?.roomName }}</span></QToolbarTitle>
@@ -155,7 +162,7 @@ import { ref, nextTick, watch, onMounted, onBeforeUnmount, onUnmounted, computed
 import { useSoupStore } from 'src/stores/soupStore';
 import usePeerClient from 'src/composables/usePeerClient';
 import { useRouter } from 'vue-router';
-import { THREE, Entity } from 'aframe';
+// import { THREE, Entity } from 'aframe';
 import { RoomState } from 'shared-types/CustomTypes';
 import { useQuasar } from 'quasar';
 import BottomPanel from 'src/components/BottomPanel.vue';
@@ -197,6 +204,7 @@ const muteStateIcons = {
   muted: 'mic_off',
   forceMuted: 'do_not_disturb',
 };
+
 const currentMuteState = computed(() => {
   if (!soupStore.clientState) return 'muted';
   if (soupStore.clientState.customProperties.forceMuted) {
@@ -278,7 +286,7 @@ watch(() => soupStore.roomState?.clients, async (newClients, _oldCLients) => {
             //   }
             // });
             await nextTick();
-            initVideoSphere();
+            // initVideoSphere();
           }
         }
       }
@@ -306,7 +314,7 @@ async function consumeVideo (producerId: string) {
   receiveStream.addTrack(track);
   attachSrcObject();
   await nextTick();
-  initVideoSphere();
+  // initVideoSphere();
 }
 
 async function consumeAudio (producerId: string) {
@@ -418,55 +426,55 @@ onUnmounted(() => {
 })();
 
 const cameraTag = ref<HTMLElement>();
-const videoRotaterTag = ref<Entity>();
-document.addEventListener('pointermove', (ev) => {
-  if (!videoIsGrabbed.value) return;
-  if (videoRotaterTag.value) {
-    console.log(ev);
-    videoRotaterTag.value.object3D.rotation.y -= THREE.MathUtils.degToRad(ev.movementX * 0.1);
-    const newZ = videoRotaterTag.value.object3D.rotation.x - THREE.MathUtils.degToRad(ev.movementY * 0.1);
-    videoRotaterTag.value.object3D.rotation.x = THREE.MathUtils.clamp(newZ, -Math.PI / 4, Math.PI / 4);
-  }
-});
+// const videoRotaterTag = ref<Entity>();
+// document.addEventListener('pointermove', (ev) => {
+//   if (!videoIsGrabbed.value) return;
+//   if (videoRotaterTag.value) {
+//     console.log(ev);
+//     videoRotaterTag.value.object3D.rotation.y -= THREE.MathUtils.degToRad(ev.movementX * 0.1);
+//     const newZ = videoRotaterTag.value.object3D.rotation.x - THREE.MathUtils.degToRad(ev.movementY * 0.1);
+//     videoRotaterTag.value.object3D.rotation.x = THREE.MathUtils.clamp(newZ, -Math.PI / 4, Math.PI / 4);
+//   }
+// });
 
 const screenshareWindowMode = ref('vr');
-const videoIsGrabbed = ref(false);
+// const videoIsGrabbed = ref(false);
 
-function videoGrabbed (ev: MouseEvent) {
-  console.log('video frame grabbed!', ev);
-  videoIsGrabbed.value = true;
-  // if (cameraTag.value) {
-  //   cameraTag.value.setAttribute('look-controls-enabled', 'false');
-  // }
-  document.addEventListener('mouseup', videoReleased, { once: true });
-}
+// function videoGrabbed (ev: MouseEvent) {
+//   console.log('video frame grabbed!', ev);
+//   videoIsGrabbed.value = true;
+//   // if (cameraTag.value) {
+//   //   cameraTag.value.setAttribute('look-controls-enabled', 'false');
+//   // }
+//   document.addEventListener('mouseup', videoReleased, { once: true });
+// }
 
-function videoClicked (ev: MouseEvent) {
-  console.log('video frame clicked!', ev);
-}
+// function videoClicked (ev: MouseEvent) {
+//   console.log('video frame clicked!', ev);
+// }
 
-function videoReleased (ev: MouseEvent) {
-  console.log('video frame released!', ev);
-  videoIsGrabbed.value = false;
-  // if (cameraTag.value) {
-  //   cameraTag.value.setAttribute('look-controls-enabled', 'true');
-  // }
-}
+// function videoReleased (ev: MouseEvent) {
+//   console.log('video frame released!', ev);
+//   videoIsGrabbed.value = false;
+//   // if (cameraTag.value) {
+//   //   cameraTag.value.setAttribute('look-controls-enabled', 'true');
+//   // }
+// }
 
 // function printEvent (ev: Event) {
 //   console.log(ev);
 // }
 
-async function initVideoSphere () {
-  const vSphere = document.querySelector('a-videosphere');
-  if (!vSphere) throw new Error('no videosphere found in DOM!!! What have you done Gunnar??');
-  // vSphere.setAttribute('srcObject', 'https://bitmovin.com/player-content/playhouse-vr/progressive.mp4');
-  vSphere.setAttribute('src', '#main-video');
-  const vVideo = document.querySelector('a-video');
-  if (!vVideo) throw new Error('no videoframe found in (a-frame) DOM!!! What have you done Gunnar??');
-  vVideo.setAttribute('src', '#screen-video');
-  // sceneEl.appendChild(vSphere);
-}
+// async function initVideoSphere () {
+//   const vSphere = document.querySelector('a-videosphere');
+//   if (!vSphere) throw new Error('no videosphere found in DOM!!! What have you done Gunnar??');
+//   // vSphere.setAttribute('srcObject', 'https://bitmovin.com/player-content/playhouse-vr/progressive.mp4');
+//   vSphere.setAttribute('src', '#main-video');
+//   const vVideo = document.querySelector('a-video');
+//   if (!vVideo) throw new Error('no videoframe found in (a-frame) DOM!!! What have you done Gunnar??');
+//   vVideo.setAttribute('src', '#screen-video');
+//   // sceneEl.appendChild(vSphere);
+// }
 </script>
 
   <style lang="scss">
@@ -476,6 +484,8 @@ async function initVideoSphere () {
     right: 0;
     width: 100vw;
     height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
     user-select: none;
     }
 
@@ -485,12 +495,10 @@ async function initVideoSphere () {
 
     #main-video {
     z-index: 50;
-    position: fixed;
-    left: 30rem;
-    bottom: 0;
-    max-width: 30rem;
-    max-height: 30rem;
-    background-color: aqua;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     }
 
     #screen-video {
