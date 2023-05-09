@@ -2,17 +2,17 @@
   <p v-if="label">
     {{ label }}
     <QIcon
-           v-if="tooltip"
-           name="help">
+      v-if="tooltip"
+      name="help">
       <QTooltip>{{ tooltip }}</QTooltip>
     </QIcon>
   </p>
   <QSelect
-           dense
-           outlined
-           v-model="selectedDevice"
-           :options="filteredDevices"
-           :option-value="'deviceId'" />
+    dense
+    outlined
+    v-model="selectedDevice"
+    :options="filteredDevices"
+    :option-value="'deviceId'" />
 </template>
 
 <script setup lang="ts">
