@@ -3,6 +3,14 @@
     <QBtn
       color="primary"
       outline
+      label="Robbit"
+      :to="{name:'robot'}"
+      icon="smart_toy"
+      icon-right="navigate_next"
+    />
+    <QBtn
+      color="primary"
+      outline
       label="Kamerastation"
       :to="{name:'camera'}"
       icon="linked_camera"

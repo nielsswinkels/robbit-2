@@ -42,6 +42,7 @@ const routes: RouteRecordRaw[] = [
       { name: 'logout', path: '/logout', component: () => import('pages/LogoutPage.vue') },
       { name: 'controlStart', path: '/teacher', component: () => import('pages/ControlStartPage.vue'), meta: { lowestAccessLevel: 'host' } },
       { name: 'camera', path: '/teacher/camera', component: () => import('pages/CameraPage.vue'), meta: { lowestAccessLevel: 'host' } },
+      { name: 'robot', path: '/teacher/robot', component: () => import('pages/RobotPage.vue'), meta: { lowestAccessLevel: 'host' } },
       { name: 'controlRoom', path: '/teacher/room/:roomId', component: () => import('pages/RoomControlPage.vue'), meta: { lowestAccessLevel: 'host' } },
       { name: 'userManager', path: '/teacher/users', component: () => import('pages/ManageUsersPage.vue'), meta: { lowestAccessLevel: 'host' } },
       { name: 'lobby', path: '/roomlist', component: () => import('pages/RoomListPage.vue') },
