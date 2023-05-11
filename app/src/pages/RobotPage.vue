@@ -77,6 +77,12 @@
         <QBtn @click="getMobileVideo(false)">
           Baksidan
         </QBtn>
+        <QBtn @click="getBluetoothDevice()">
+          Bluetooth
+        </QBtn>
+        <QBtn @click="sendBluetoothData()">
+          Move!
+        </QBtn>
         <DevicePicker
           label="Välj din kamera från nedanstående lista av anslutna video-enheter"
           tooltip="Om du inte väljer en videokälla kommer mottagarna inte se något"
@@ -119,6 +125,8 @@ import { getAllGatherings } from 'src/modules/authClient';
 import ClientList from 'src/components/ClientList.vue';
 import { extractMessageFromCatch } from 'shared-modules/utilFns';
 import { createResponse } from 'shared-types/MessageTypes';
+import { Services, getServices, requestMicrobit } from 'microbit-web-bluetooth';
+import type { BluetoothDevice } from 'web-bluetooth';
 
 const $q = useQuasar();
 const peer = usePeerClient();
@@ -138,6 +146,9 @@ const userStore = useUserStore();
 const persistedStore = usePersistedStore();
 
 const roomIsOpen = ref<boolean>(false);
+
+const bleDevice = ref<BluetoothDevice>();
+const bleServices = ref<Services>();
 
 function toggleOpenRoom () {
   if (!soupStore.roomId) {
@@ -462,6 +473,41 @@ async function enterGatheringAndRoom (gatheringName: string, roomName: string) {
 
   const roomState = await peer.joinOrCreateRoom(roomName);
   soupStore.setRoomState(roomState);
+}
+
+async function getBluetoothDevice () {
+  bleDevice.value = await requestMicrobit(window.navigator.bluetooth);
+  if (!bleDevice.value) {
+    console.log('Bluetooth device not found.');
+    return;
+  }
+  console.log(bleDevice.value);
+  bleServices.value = await getServices(bleDevice.value);
+  if (!bleServices.value) {
+    console.log('Bluetooth services not found.');
+    return;
+  }
+  console.log(bleServices.value);
+  console.log(bleServices.value.uartService);
+}
+
+async function bleEventHandler (event) {
+  console.log('received:');
+  console.log(event);
+}
+
+async function sendBluetoothData () {
+  // this.services = await getServices(this.device);
+  if (!bleServices.value || !bleServices.value.uartService) {
+    console.log('No bluetooth uart service found?');
+    return;
+  }
+  bleServices.value.uartService.addEventListener('receiveText', bleEventHandler);
+  const result = await bleServices.value.uartService.sendText('300,300,65\n');
+  // await this.services.uartService.send(new Uint8Array([104, 101, 108, 108, 111, 58])); // hello:
+  console.log(result);
+  await bleServices.value.uartService.sendText('0,0,65\n');
+  // this.services.uartService.emit('0, 0, 65')
 }
 </script>
 
