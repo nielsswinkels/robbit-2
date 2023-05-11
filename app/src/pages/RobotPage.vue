@@ -198,7 +198,8 @@ async function saveRoomName () {
   editingRoomName.value = false;
 }
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
+  await stopVideoTracks();
   peer.leaveRoom();
   peer.closeAndNotifyAllConsumers();
   peer.closeAndNotifyAllProducers();
@@ -249,6 +250,7 @@ onUnmounted(() => {
     //   video: true,
     //   audio: true,
     // });
+    getMobileVideo(true);
   } catch (e) {
     // TODO: find a nice way to ignore rejected dialog if navigating away from page.
     const msg = extractMessageFromCatch(e, 'failed to initialize camerapage!');
@@ -262,46 +264,7 @@ onUnmounted(() => {
   }
 })();
 
-async function getMobileVideo2 () {
-  if (!videoTag.value) {
-    console.log('template ref not available');
-    return;
-  }
-  videoTag.value.srcObject = null;
-  // videoTag.value.pause();
-  if (originalVideoTrack) {
-    await originalVideoTrack.stop();
-  }
-  if (videoStream) {
-    await videoStream.getTracks().forEach(function (track) {
-      console.log('stopping track');
-      track.stop();
-      videoStream.removeTrack(track);
-    });
-  }
-  const constraints = {
-    video: {
-      facingMode: {
-        ideal: 'environment',
-      },
-    },
-  };
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then((stream) => {
-      console.log('Found stream');
-      console.log(stream);
-      if (!videoTag.value) {
-        console.log('template ref not available');
-        return;
-      }
-      videoStream = stream;
-      videoTag.value.srcObject = stream;
-    })
-    .catch(console.error);
-}
-
-async function getMobileVideo (frontfacing: boolean) {
-  console.log('Did we find any mobile cameras?');
+async function stopVideoTracks () {
   if (originalVideoTrack) {
     console.log('stopping original video track');
     await originalVideoTrack.stop();
@@ -317,6 +280,11 @@ async function getMobileVideo (frontfacing: boolean) {
       videoStream.removeTrack(track);
     });
   }
+}
+
+async function getMobileVideo (frontfacing: boolean) {
+  console.log('Did we find any mobile cameras?');
+  await stopVideoTracks();
   if (videoProducerId) {
     // await peer.pauseProducer(videoProducerId);
     // await peer.closeAndNotifyProducer(videoProducerId);
@@ -401,21 +369,7 @@ async function onVideoPicked (deviceInfo: MediaDeviceInfo) {
     console.log('template ref not available');
     return;
   }
-  if (originalVideoTrack) {
-    console.log('stopping original video track');
-    await originalVideoTrack.stop();
-  }
-  if (clonedVideoTrack) {
-    console.log('stopping cloned video track');
-    await clonedVideoTrack.stop();
-  }
-  if (videoStream) {
-    await videoStream.getTracks().forEach(function (track) {
-      console.log('stopping track');
-      track.stop();
-      videoStream.removeTrack(track);
-    });
-  }
+  await stopVideoTracks();
   // videoStream = await peer.requestMedia(deviceInfo.deviceId);
   videoStream = await navigator.mediaDevices.getUserMedia({
     video: {
