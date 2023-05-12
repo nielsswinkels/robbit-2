@@ -103,10 +103,35 @@ export default class Client {
       console.error('message handler called with response message. That should not happen!!', msg);
       return;
     }
+    console.log('received normal message (not request)');
     if(msg.type === 'message'){
       //TODO: Handle the message type
-      console.log('received normal message (not request)');
-      console.warn('No message handlers implemented!!!');
+      switch (msg.subject) {
+        case 'robotControl': {
+          console.log('robotControl message received!');
+          if (!this.gathering) {
+            console.log('No gathering? Can not handle this robotControl message.')
+            break;
+          }
+          const roomId = msg.data.roomId;
+          const foundRoom = this.gathering.getRoom({id: roomId});
+          const robot = foundRoom.getRobot();
+          // then find robot
+          // then send message to robot
+          if (!robot) {
+            console.log('Room has no robot. Can not control a robot if they are not there now can we?')
+            break;
+          }
+          const message = createMessage('robotControl', {
+            msg: msg.data.msg,
+            roomId: msg.data.roomId});
+          robot.send(message);
+          break;
+        }
+        default:
+          console.warn('No message handlers implemented!!!');
+        break;
+      }
       return;
     }
     if(!msg.id){
@@ -380,6 +405,32 @@ export default class Client {
           response = createResponse('joinRoom', msg.id, {
             wasSuccess: false,
             message: extractMessageFromCatch(e, `failed to joinRoom: ${msg.data.roomId}`)
+          });
+        }
+        this.send(response);
+        break;
+      }
+      case 'joinRoomAsRobot': {
+        console.log('TRYING TO JOIN AS A ROOOOOBOOOOOT');
+        this.leaveCurrentRoom(false);
+        let response: ResponseTo<'joinRoomAsRobot'>;
+        try{
+
+          if(!this.gathering){
+            throw Error('not in a gathering. Can not join a room without being in a gathering');
+          }
+          const roomId = msg.data.roomId;
+          const foundRoom = this.gathering.getRoom({id: roomId});
+          foundRoom.addRobot(this);
+          response = createResponse('joinRoomAsRobot', msg.id, {
+            data: foundRoom.roomState,
+            wasSuccess: true,
+          });
+        } catch(e){
+          this.setRoom(undefined);
+          response = createResponse('joinRoomAsRobot', msg.id, {
+            wasSuccess: false,
+            message: extractMessageFromCatch(e, `failed to joinRoomAsRobot: ${msg.data.roomId}`)
           });
         }
         this.send(response);

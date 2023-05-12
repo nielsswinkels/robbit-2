@@ -26,7 +26,7 @@
         class="row items-center q-gutter-sm"
       >
         <div class="text-h5">
-          Namn: {{ soupStore.roomState?.roomName }}
+          Namn!: {{ soupStore.roomState?.roomName }}
         </div>
         <QBtn
           round
@@ -471,7 +471,7 @@ async function enterGatheringAndRoom (gatheringName: string, roomName: string) {
   await peer.loadMediasoupDevice();
   await peer.createSendTransport();
 
-  const roomState = await peer.joinOrCreateRoom(roomName);
+  const roomState = await peer.joinOrCreateRoom(roomName, true);
   soupStore.setRoomState(roomState);
 }
 
@@ -496,19 +496,29 @@ async function bleEventHandler (event) {
   console.log(event);
 }
 
-async function sendBluetoothData () {
+async function sendBluetoothData (data: string) {
   // this.services = await getServices(this.device);
   if (!bleServices.value || !bleServices.value.uartService) {
     console.log('No bluetooth uart service found?');
     return;
   }
   bleServices.value.uartService.addEventListener('receiveText', bleEventHandler);
-  const result = await bleServices.value.uartService.sendText('300,300,65\n');
+  // const result = await bleServices.value.uartService.sendText('300,300,65\n');
+  const result = await bleServices.value.uartService.sendText(data);
   // await this.services.uartService.send(new Uint8Array([104, 101, 108, 108, 111, 58])); // hello:
   console.log(result);
-  await bleServices.value.uartService.sendText('0,0,65\n');
+  // await bleServices.value.uartService.sendText('0,0,65\n');
   // this.services.uartService.emit('0, 0, 65')
 }
+
+peer.on('robotControl', (payload) => {
+  console.log('Peer received robotcontrol!!!!');
+  sendBluetoothData(payload.msg);
+  // if (payload.objectType === 'consumer' && payload.objectId === screenShareConsumerId.value) {
+  //   screenShareConsumerId.value = undefined;
+  // }
+});
+
 </script>
 
 <style lang="scss">

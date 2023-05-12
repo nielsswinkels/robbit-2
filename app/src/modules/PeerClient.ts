@@ -2,7 +2,7 @@ import { types as mediasoupTypes } from 'mediasoup-client';
 import * as mediasoupClient from 'mediasoup-client';
 // import { createSocket, tearDown, sendRequest, socketEvents } from 'src/modules/webSocket';
 import socketutils from 'src/modules/webSocket';
-import { createRequest, Message, RequestSubjects, Request, MessageSubjects, AnyResponse } from 'shared-types/MessageTypes';
+import { createRequest, Message, RequestSubjects, Request, SocketMessage, AnyMessage, MessageSubjects, AnyResponse } from 'shared-types/MessageTypes';
 import { ClientProperties, ProducerInfo, RoomProperties } from 'shared-types/CustomTypes';
 import { TypedEmitter } from 'tiny-typed-emitter';
 
@@ -247,6 +247,12 @@ export default class PeerClient extends TypedEmitter<PeerEvents> {
     return response.data;
   };
 
+  joinRoomAsRobot = async (roomId: string) => {
+    const joinRoomReq = createRequest('joinRoomAsRobot', { roomId });
+    const response = await socketutils.sendRequest(joinRoomReq);
+    return response.data;
+  };
+
   setRoomName = async (roomId: string, roomName: string) => {
     const req = createRequest('setRoomName', {
       roomId,
@@ -261,14 +267,14 @@ export default class PeerClient extends TypedEmitter<PeerEvents> {
     return response.data;
   };
 
-  joinOrCreateRoom = async (roomName: string) => {
+  joinOrCreateRoom = async (roomName: string, isRobot: boolean) => {
     try {
       const roomId = await this.findRoom(roomName);
-      return this.joinRoom(roomId);
+      return this.joinRoomAsRobot(roomId);
     } catch (e) {
       console.warn(e);
       const roomState = await this.createRoom(roomName);
-      return this.joinRoom(roomState.roomId);
+      return this.joinRoomAsRobot(roomState.roomId);
     }
   };
 
@@ -587,5 +593,9 @@ export default class PeerClient extends TypedEmitter<PeerEvents> {
       await socketutils.sendRequest(notifyCloseEventReq);
       this.producers.delete(producerKey);
     }
+  };
+
+  controlRobot = async (msg: SocketMessage<AnyMessage>) => {
+    socketutils.send(msg);
   };
 }

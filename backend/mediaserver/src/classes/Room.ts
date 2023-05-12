@@ -22,6 +22,7 @@ export default class Room {
       audio: undefined,
     };
   clients: Map<string, Client> = new Map();
+  robot: Client | undefined = undefined;
   customProperties: RoomProperties = {};
 
   private gatheringId: string | undefined = undefined;
@@ -77,6 +78,26 @@ export default class Room {
     client.setRoom(this.id);
     // TODO; Should we perhaps only broadcast roomstate here?
     this.gathering?.broadCastGatheringState([client.id], 'client added to room');
+  }
+
+  addRobot(client: Client) {
+    if (this.robot) {
+      throw Error('There is already a robot in the room!!');
+      // roomWarn('This client is already in the room!!');
+      // return false;
+    }
+    this.robot = client;
+    client.setRoom(this.id);
+    // TODO; Should we perhaps only broadcast roomstate here?
+    this.gathering?.broadCastGatheringState([client.id], 'robot added to room');
+  }
+
+  getRobot() {
+    return this.robot
+  }
+
+  removeRobot() {
+    this.robot = undefined;
   }
 
   removeClient(clientOrId: Client | string, skipBroadcast = false) {

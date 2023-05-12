@@ -107,6 +107,9 @@ export type AnyRequest =
   | RequestBuilder<'joinRoom', {
     roomId: string,
   }>
+  | RequestBuilder<'joinRoomAsRobot', {
+    roomId: string,
+  }>
   | RequestBuilder<'requestToJoinRoom', {
     roomId: string,
   }>
@@ -115,6 +118,10 @@ export type AnyRequest =
     clientId: string,
   }>
   | RequestBuilder<'removeClientFromRoom', {
+    clientId: string,
+    roomId: string,
+  }>
+  | RequestBuilder<'removeRobotFromRoom', {
     clientId: string,
     roomId: string,
   }>
@@ -163,6 +170,7 @@ export type AnyMessage =
     objectType: 'router' | 'transport' | 'producer' | 'consumer' | 'dataproducer' | 'dataconsumer'
     objectId: string,
   }>
+  | MessageBuilder<'robotControl', { msg: string, roomId: string }>
 // | MessageBuilder<'chatMessage', {
 //   textMessage: string
 // }>
@@ -229,9 +237,11 @@ export type AnyResponse =
   | ResponseBuilder<'createRoom', RoomState>
   | ResponseBuilder<'setRoomName'>
   | ResponseBuilder<'joinRoom', RoomState>
+  | ResponseBuilder<'joinRoomAsRobot', RoomState>
   | ResponseBuilder<'requestToJoinRoom', RoomState>
   | ResponseBuilder<'forwardedRequestToJoinRoom'>
   | ResponseBuilder<'removeClientFromRoom'>
+  | ResponseBuilder<'removeRobotFromRoom'>
   | ResponseBuilder<'closeAllProducersForClient'>
   | ResponseBuilder<'pauseAllProducersForClient'>
   | ResponseBuilder<'setForceMuteStateForProducer'>

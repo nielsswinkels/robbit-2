@@ -28,6 +28,13 @@ peer.on('clientStateUpdated', data => {
   soupStore.clientState = data.newState;
 });
 
+peer.on('robotControl', (payload) => {
+  console.log('Peer received robotcontrol!!!!');
+  // if (payload.objectType === 'consumer' && payload.objectId === screenShareConsumerId.value) {
+  //   screenShareConsumerId.value = undefined;
+  // }
+});
+
 peer.socketEvents.on('open', () => { soupStore.connected = true; });
 peer.socketEvents.on('close', (ev) => {
   if (ev.code === 1006) {

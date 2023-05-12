@@ -143,6 +143,18 @@
           round
           @click="toggleRaiseHand"
         />
+        <QBtn
+          id="forward-button"
+          icon="arrow_upward"
+          round
+          @click="driveForward"
+        />
+        <QBtn
+          id="backward-button"
+          icon="arrow_downward"
+          round
+          @click="driveStop"
+        />
       </div>
       <QBtn
         label="Enter VR"
@@ -167,6 +179,7 @@ import { RoomState } from 'shared-types/CustomTypes';
 import { useQuasar } from 'quasar';
 import BottomPanel from 'src/components/BottomPanel.vue';
 import { useUserStore } from 'stores/userStore';
+import { createMessage } from 'shared-types/MessageTypes';
 
 const $q = useQuasar();
 
@@ -303,6 +316,22 @@ async function toggleRaiseHand () {
   await peer.setCustomClientProperties({
     handRaised: handRaised.value,
   });
+}
+
+async function driveForward () {
+  if (!soupStore.roomId) {
+    console.log('We have no room id? Can not talk to robot then.');
+    return;
+  }
+  await peer.controlRobot(createMessage('robotControl', { msg: '300,300,65\n', roomId: soupStore.roomId }));
+}
+
+async function driveStop () {
+  if (!soupStore.roomId) {
+    console.log('We have no room id? Can not talk to robot then.');
+    return;
+  }
+  await peer.controlRobot(createMessage('robotControl', { msg: '0,0,65\n', roomId: soupStore.roomId }));
 }
 
 const receiveStream = new MediaStream();
