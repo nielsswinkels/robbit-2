@@ -128,7 +128,7 @@ export default {
   send: (msg: SocketMessage<UnknownMessageType>) => {
     const string = JSON.stringify(msg);
     socket?.send(string);
-    console.log('sending message:', msg);
+    // console.log('sending message:', msg);
   },
   // Basically this should be safe as long as the client dont have more than 10 pending messages simultanesously.
   sendRequest: async <T extends RequestSubjects>(msg: SocketMessage<Request<T>>, timeoutMillis?: number): Promise<SuccessResponseTo<T>> => {

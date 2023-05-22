@@ -147,13 +147,43 @@
           id="forward-button"
           icon="arrow_upward"
           round
-          @click="driveForward"
+          @mousedown="forwardActive = true"
+          @mouseup="forwardActive = false"
         />
         <QBtn
           id="backward-button"
           icon="arrow_downward"
           round
-          @click="driveStop"
+          @mousedown="reverseActive = true"
+          @mouseup="reverseActive = false"
+        />
+        <QBtn
+          id="left-button"
+          icon="arrow_left"
+          round
+          @mousedown="robotRotation = -1"
+          @mouseup="robotRotation = 0"
+        />
+        <QBtn
+          id="right-button"
+          icon="arrow_right"
+          round
+          @mousedown="robotRotation = 1"
+          @mouseup="robotRotation = 0"
+        />
+        <QBtn
+          id="look-up-button"
+          icon="arrow_drop_up"
+          round
+          @mousedown="servoAngleChange = 1"
+          @mouseup="servoAngleChange = 0"
+        />
+        <QBtn
+          id="look-down-button"
+          icon="arrow_drop_down"
+          round
+          @mousedown="servoAngleChange = -1"
+          @mouseup="servoAngleChange = 0"
         />
       </div>
       <QBtn
@@ -170,7 +200,7 @@
     setup
     lang="ts"
   >
-import { ref, nextTick, watch, onMounted, onBeforeUnmount, onUnmounted, computed } from 'vue';
+import { ref, nextTick, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useSoupStore } from 'src/stores/soupStore';
 import usePeerClient from 'src/composables/usePeerClient';
 import { useRouter } from 'vue-router';
@@ -180,6 +210,7 @@ import { useQuasar } from 'quasar';
 import BottomPanel from 'src/components/BottomPanel.vue';
 import { useUserStore } from 'stores/userStore';
 import { createMessage } from 'shared-types/MessageTypes';
+import Timeout from 'await-timeout';
 
 const $q = useQuasar();
 
@@ -318,20 +349,173 @@ async function toggleRaiseHand () {
   });
 }
 
-async function driveForward () {
+let forwardActive: boolean;
+let reverseActive: boolean;
+let robotThrottle = 0;
+let robotRotation = 0;
+let servoAngleChange = 0;
+// let isParked = false;
+// let isWaving = false;
+const SERVO_START_VALUE = 65;
+const SERVO_MAX_VALUE = 100;
+const SERVO_MIN_VALUE = 20;
+const ROBOT_MOTOR_MAX_THROTTLE = 1000;
+let DRIVE_MOTOR_SCALE = 0.3;
+let TURN_MOTOR_SCALE = 0.23;
+const SERVO_SCALE = 5;
+let servoAngle = SERVO_START_VALUE;
+
+async function driveRobot () {
   if (!soupStore.roomId) {
     console.log('We have no room id? Can not talk to robot then.');
     return;
   }
-  await peer.controlRobot(createMessage('robotControl', { msg: '300,300,65\n', roomId: soupStore.roomId }));
+  if (forwardActive) {
+    robotThrottle =
+      ROBOT_MOTOR_MAX_THROTTLE * DRIVE_MOTOR_SCALE;
+  } else if (reverseActive) {
+    robotThrottle =
+      -ROBOT_MOTOR_MAX_THROTTLE * DRIVE_MOTOR_SCALE;
+  } else {
+    robotThrottle = 0;
+  }
+
+  const rotationMotorAdjustment =
+    robotRotation *
+    ROBOT_MOTOR_MAX_THROTTLE *
+    TURN_MOTOR_SCALE; // -20 to +20
+
+  let leftMotor = robotThrottle + rotationMotorAdjustment;
+  let rightMotor = robotThrottle - rotationMotorAdjustment;
+
+  // Section for constraining motor values within max allowed throttle
+  let ratio = 1;
+  if (
+    Math.abs(leftMotor) > ROBOT_MOTOR_MAX_THROTTLE ||
+    Math.abs(rightMotor) > ROBOT_MOTOR_MAX_THROTTLE
+  ) {
+    ratio =
+      ROBOT_MOTOR_MAX_THROTTLE /
+      Math.max(Math.abs(leftMotor), Math.abs(rightMotor));
+  }
+  leftMotor *= ratio;
+  rightMotor *= ratio;
+
+  const leftMotorFloored = Math.floor(leftMotor);
+  const rightMotorFloored = Math.floor(rightMotor);
+
+  servoAngle -= servoAngleChange * SERVO_SCALE;
+  servoAngle = Math.max(
+    SERVO_MIN_VALUE,
+    Math.min(SERVO_MAX_VALUE, servoAngle));
+  const servoFloored = Math.floor(servoAngle);
+  const robotControlMsg = `${leftMotorFloored},${rightMotorFloored},${servoFloored}\n`;
+  console.log(`Sending robotcontrol ${robotControlMsg}`);
+  await peer.controlRobot(createMessage('robotControl', { msg: robotControlMsg, roomId: soupStore.roomId }));
 }
 
-async function driveStop () {
-  if (!soupStore.roomId) {
-    console.log('We have no room id? Can not talk to robot then.');
-    return;
+function toggleSpeed () {
+  if (DRIVE_MOTOR_SCALE === 1) {
+    DRIVE_MOTOR_SCALE = 0.3;
+    TURN_MOTOR_SCALE = 0.23;
+  } else {
+    DRIVE_MOTOR_SCALE = 1;
+    TURN_MOTOR_SCALE = 0.3;
   }
-  await peer.controlRobot(createMessage('robotControl', { msg: '0,0,65\n', roomId: soupStore.roomId }));
+  console.log('Set DRIVE_MOTOR_SCALE to ' + DRIVE_MOTOR_SCALE);
+}
+
+function handleKeypress (event: KeyboardEvent) {
+  console.log(event);
+  // //Bail out if we're in the chat box
+  // if (document.activeElement.className.includes("text-input")) {
+  //   return;
+  // }
+
+  if (event.type === 'keydown') {
+    switch (event.key) {
+      case 'ArrowUp':
+        servoAngleChange = 1;
+        break;
+      case 'ArrowDown':
+        servoAngleChange = -1;
+        break;
+      case 'ArrowLeft':
+        robotRotation = -1;
+        break;
+      case 'ArrowRight':
+        robotRotation = 1;
+        break;
+      case 'a':
+      case 'A':
+        // if (!isParked) {
+        forwardActive = true;
+        // }
+        break;
+      case 'z':
+      case 'Z':
+        // if (!isParked) {
+        reverseActive = true;
+        // }
+        break;
+      case 'i':
+      case 'I':
+        // presentSettingsPopover(undefined);
+        break;
+      case 'e':
+      case 'E':
+        // if (!showCamera) {
+        //   presentEmojiPopover(undefined);
+        // }
+        break;
+      case 'k':
+      case 'K':
+        // toggleVideoTrack();
+        break;
+      case 'm':
+      case 'M':
+        // toggleAudioTrack();
+        break;
+      case 'r':
+      case 'R':
+        // toggleWaving();
+        toggleRaiseHand();
+        break;
+      case 'p':
+      case 'P':
+        toggleSpeed();
+        break;
+      case 'o':
+      case 'O':
+        // changeRobotCamera();
+        break;
+    }
+  } else if (event.type === 'keyup') {
+    switch (event.key) {
+      case 'a':
+        forwardActive = false;
+        break;
+      case 'z':
+        reverseActive = false;
+        break;
+      case 'ArrowLeft':
+        robotRotation = 0;
+        break;
+      case 'ArrowRight':
+        robotRotation = 0;
+        break;
+      case 'ArrowUp':
+        servoAngleChange = 0;
+        break;
+      case 'ArrowDown':
+        servoAngleChange = 0;
+        break;
+      // case 'Escape':
+      //   console.log('Escape was pressed!!!!');
+      //   chatInput['_native'].nativeElement.blur();
+      //   break;
+    }
+  }
 }
 
 const receiveStream = new MediaStream();
@@ -351,20 +535,6 @@ async function consumeAudio (producerId: string) {
   receiveStream.addTrack(track);
 }
 
-onMounted(() => {
-  if (!userStore.firstInteractionDone) {
-    $q.dialog({
-      title: 'Sidan laddad',
-      message: 'Starta?',
-    }).onDismiss(() => {
-      attachSrcObject();
-      userStore.firstInteractionDone = true;
-    });
-  } else {
-    attachSrcObject();
-  }
-});
-
 function attachSrcObject () {
   if (!videoTag.value) {
     console.error('no video tag to attach stream to!');
@@ -377,8 +547,33 @@ function attachSrcObject () {
   videoTag.value.srcObject = receiveStream;
 }
 
+let robotControlIntervalId: Timeout;
+
+onMounted(() => {
+  if (!userStore.firstInteractionDone) {
+    $q.dialog({
+      title: 'Sidan laddad',
+      message: 'Starta?',
+    }).onDismiss(() => {
+      attachSrcObject();
+      userStore.firstInteractionDone = true;
+    });
+  } else {
+    attachSrcObject();
+  }
+  robotThrottle = 0;
+  robotRotation = 0;
+  servoAngleChange = 0;
+  robotControlIntervalId = setInterval(driveRobot, 300);
+  window.addEventListener('keyup', handleKeypress);
+  window.addEventListener('keydown', handleKeypress);
+});
+
 onUnmounted(() => {
   console.log('UNMOUNTING"""""""""""""');
+  clearInterval(robotControlIntervalId);
+  window.removeEventListener('keyup', handleKeypress);
+  window.removeEventListener('keydown', handleKeypress);
   // peer.closeAndNotifyAllConsumers();
   // peer.receiveTransport?.close();
   $q.loading.hide();
