@@ -97,11 +97,19 @@ export default class Room {
   }
 
   removeRobot() {
+    console.log('Removing robot from room.');
     this.robot = undefined;
   }
 
   removeClient(clientOrId: Client | string, skipBroadcast = false) {
     let client: Client;
+    let hasRemovedRobot = false;
+    const robot = this.getRobot();
+    if (robot && (robot.id === clientOrId || (clientOrId instanceof Client && clientOrId.id && robot.id === clientOrId.id))) {
+      client = robot;
+      this.removeRobot();
+      hasRemovedRobot = true;
+    }
     if (!(clientOrId instanceof Client)) {
       const foundClient = this.clients.get(clientOrId);
       if (!foundClient) {
@@ -118,32 +126,32 @@ export default class Room {
       throw new Error('invalid client object provided when trying to remove client from room. id missing!');
     }
     const isInDictionary = this.clients.has(client.id);
-    if (!isInDictionary) {
+    if (!isInDictionary && !hasRemovedRobot) {
       roomWarn('client is NOT in the room, Cant remove client from the room');
       return;
     }
     if (this.mainProducers.audio || this.mainProducers.video) {
       roomLog('HAS MAINPRODUCER!!!!');
       if (this.mainProducers.video) {
-        if (client.producers.has(this.mainProducers.video.id)) {
-          roomLog('removed client was also video mainProducer. Will remove it as well from the room');
+        if (client.producers.has(this.mainProducers.video.id) || (robot && robot.producers.has(this.mainProducers.video.id))) {
+          roomLog('removed client/robot was also video mainProducer. Will remove it as well from the room');
           this.mainProducers.video = undefined;
         }
       }
       if (this.mainProducers.audio) {
-        if (client.producers.has(this.mainProducers.audio.id)) {
-          roomLog('removed client was also audio mainProducer. Will remove it as well from the room');
+        if (client.producers.has(this.mainProducers.audio.id) || (robot && robot.producers.has(this.mainProducers.audio.id))) {
+          roomLog('removed client/robot was also audio mainProducer. Will remove it as well from the room');
           this.mainProducers.audio = undefined;
         }
       }
     }
     delete client.customProperties.forceMuted;
     const ok = this.clients.delete(client.id);
-    if (!ok) {
+    if (!ok && !hasRemovedRobot) {
       throw new Error(`failed to remove client ${client.id} from room`);
     }
     client.setRoom(undefined); // Be aware. I've now decided to let the room be responsible for clearing the clients room-field.
-    if (this.clients.size == 0) {
+    if (this.clients.size == 0 && !this.getRobot()) {
       roomLog('last client left the room. will also remove the room itself');
       this.gathering?.deleteRoom(this);
     }
