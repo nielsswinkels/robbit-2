@@ -149,6 +149,8 @@
           round
           @mousedown="forwardActive = true"
           @mouseup="forwardActive = false"
+          @touchstart="forwardActive = true"
+          @touchend="forwardActive = false"
         />
         <QBtn
           id="backward-button"
@@ -156,6 +158,8 @@
           round
           @mousedown="reverseActive = true"
           @mouseup="reverseActive = false"
+          @touchstart="reverseActive = true"
+          @touchend="reverseActive = false"
         />
         <QBtn
           id="left-button"
@@ -163,6 +167,8 @@
           round
           @mousedown="robotRotation = -1"
           @mouseup="robotRotation = 0"
+          @touchstart="robotRotation = -1"
+          @touchend="robotRotation = 0"
         />
         <QBtn
           id="right-button"
@@ -170,6 +176,8 @@
           round
           @mousedown="robotRotation = 1"
           @mouseup="robotRotation = 0"
+          @touchstart="robotRotation = 1"
+          @touchend="robotRotation = 0"
         />
         <QBtn
           id="look-up-button"
@@ -177,6 +185,8 @@
           round
           @mousedown="servoAngleChange = 1"
           @mouseup="servoAngleChange = 0"
+          @touchstart="servoAngleChange = 1"
+          @touchend="servoAngleChange = 0"
         />
         <QBtn
           id="look-down-button"
@@ -184,6 +194,8 @@
           round
           @mousedown="servoAngleChange = -1"
           @mouseup="servoAngleChange = 0"
+          @touchstart="servoAngleChange = -1"
+          @touchend="servoAngleChange = 0"
         />
       </div>
       <QBtn
