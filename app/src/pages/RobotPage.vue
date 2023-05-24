@@ -80,9 +80,10 @@
         <QBtn @click="getBluetoothDevice()">
           Bluetooth
         </QBtn>
-        <QBtn @click="sendBluetoothData()">
-          Move!
-        </QBtn>
+        <QIcon
+          :name="(bleConnected?'bluetooth_connected':'bluetooth_disabled')"
+          :color="(bleConnected?'positive':'negative')"
+        ></QIcon>
         <DevicePicker
           label="Välj din kamera från nedanstående lista av anslutna video-enheter"
           tooltip="Om du inte väljer en videokälla kommer mottagarna inte se något"
@@ -149,6 +150,7 @@ const roomIsOpen = ref<boolean>(false);
 
 const bleDevice = ref<BluetoothDevice>();
 const bleServices = ref<Services>();
+const bleConnected = ref<boolean>(false);
 
 function toggleOpenRoom () {
   if (!soupStore.roomId) {
@@ -487,26 +489,39 @@ async function getBluetoothDevice () {
     console.log('Bluetooth services not found.');
     return;
   }
+  if (!bleServices.value.uartService) {
+    console.log('Bluetooth uartService not found.');
+    return;
+  }
   console.log(bleServices.value);
   console.log(bleServices.value.uartService);
+  bleDevice.value.addEventListener('gattserverdisconnected', bleDisconnected);
+  bleServices.value.uartService.addEventListener('receiveText', bleEventHandler);
+  bleConnected.value = true;
 }
 
-async function bleEventHandler (event) {
-  console.log('received:');
+async function bleEventHandler (event: Event) {
+  console.log('bleEventHandler received:');
   console.log(event);
 }
 
+async function bleDisconnected (event: Event) {
+  console.log('BLE disconnected:');
+  console.log(event);
+  bleConnected.value = false;
+}
+
 async function sendBluetoothData (data: string) {
-  // this.services = await getServices(this.device);
-  if (!bleServices.value || !bleServices.value.uartService) {
+  if (!bleConnected.value || !bleServices.value || !bleServices.value.uartService) {
     console.log('No bluetooth uart service found?');
     return;
   }
-  bleServices.value.uartService.addEventListener('receiveText', bleEventHandler);
+
   // const result = await bleServices.value.uartService.sendText('300,300,65\n');
-  const result = await bleServices.value.uartService.sendText(data);
+  console.log('Going to send bluetooth data');
+  await bleServices.value.uartService.sendText(data);
   // await this.services.uartService.send(new Uint8Array([104, 101, 108, 108, 111, 58])); // hello:
-  console.log(result);
+  // console.log(result);
   // await bleServices.value.uartService.sendText('0,0,65\n');
   // this.services.uartService.emit('0, 0, 65')
 }
