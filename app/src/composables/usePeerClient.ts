@@ -29,7 +29,7 @@ peer.on('clientStateUpdated', data => {
 });
 
 peer.on('robotControl', (payload) => {
-  console.log('Peer received robotcontrol!!!!');
+  // console.log('Peer received robotcontrol!!!!');
   // if (payload.objectType === 'consumer' && payload.objectId === screenShareConsumerId.value) {
   //   screenShareConsumerId.value = undefined;
   // }

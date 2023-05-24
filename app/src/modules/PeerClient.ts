@@ -97,7 +97,9 @@ export default class PeerClient extends TypedEmitter<PeerEvents> {
           break;
         }
         default: {
-          console.log(`message received ${msg.subject}`, msg);
+          if (msg.subject !== 'robotControl') {
+            console.log(`message received ${msg.subject}`, msg);
+          }
           break;
         }
       }

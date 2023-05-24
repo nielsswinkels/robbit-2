@@ -513,12 +513,12 @@ async function bleDisconnected (event: Event) {
 
 async function sendBluetoothData (data: string) {
   if (!bleConnected.value || !bleServices.value || !bleServices.value.uartService) {
-    console.log('No bluetooth uart service found?');
+    // console.log('No bluetooth uart service found?');
     return;
   }
 
   // const result = await bleServices.value.uartService.sendText('300,300,65\n');
-  console.log('Going to send bluetooth data');
+  // console.log('Going to send bluetooth data');
   await bleServices.value.uartService.sendText(data);
   // await this.services.uartService.send(new Uint8Array([104, 101, 108, 108, 111, 58])); // hello:
   // console.log(result);
@@ -527,11 +527,8 @@ async function sendBluetoothData (data: string) {
 }
 
 peer.on('robotControl', (payload) => {
-  console.log('Peer received robotcontrol!!!!');
+  // console.log('Peer received robotcontrol!');
   sendBluetoothData(payload.msg);
-  // if (payload.objectType === 'consumer' && payload.objectId === screenShareConsumerId.value) {
-  //   screenShareConsumerId.value = undefined;
-  // }
 });
 
 </script>
