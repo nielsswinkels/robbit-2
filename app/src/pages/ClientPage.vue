@@ -438,7 +438,7 @@ function toggleSpeed () {
 }
 
 function handleKeypress (event: KeyboardEvent) {
-  console.log(event);
+  // console.log(event);
   // //Bail out if we're in the chat box
   // if (document.activeElement.className.includes("text-input")) {
   //   return;
