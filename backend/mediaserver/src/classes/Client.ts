@@ -88,7 +88,9 @@ export default class Client {
 
 
     ws.registerReceivedMessageCallback((msg) => {
-      console.log('client received message:', msg);
+      if (msg.subject !== 'robotControl') {
+        console.log('client received message:', msg);
+      }
       this.handleReceivedMsg(msg);
     });
     this.onClientStateUpdated('server side client instance created');
@@ -103,12 +105,14 @@ export default class Client {
       console.error('message handler called with response message. That should not happen!!', msg);
       return;
     }
-    console.log('received normal message (not request)');
     if(msg.type === 'message'){
+      if(msg.subject !== 'robotControl') {
+        console.log('received normal message (not request)');
+      }
       //TODO: Handle the message type
       switch (msg.subject) {
         case 'robotControl': {
-          console.log('robotControl message received!');
+          // console.log('robotControl message received!');
           if (!this.gathering) {
             console.log('No gathering? Can not handle this robotControl message.')
             break;
@@ -1079,7 +1083,9 @@ export default class Client {
   }
 
   send(msg: SocketMessage<UnknownMessageType>) {
-    console.log(`gonna send message to client ${this.id}:`, msg);
+    if (msg.subject !== 'robotControl') {
+      console.log(`gonna send message to client ${this.id}:`, msg);
+    }
     if(!this.connected){
       console.error('Tried to send to a closed socket. NOOO GOOD!');
       return;
