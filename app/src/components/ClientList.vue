@@ -45,7 +45,15 @@
                   v-if="producer.kind === 'video'"
                 >🎥</span>
                 <audio
-                  :ref="(el) => { producerAudioTags[producer.producerId] = el as HTMLAudioElement }"
+                :ref="(el) => { producerAudioTags[producer.producerId] = el as HTMLAudioElement }"
+                autoplay
+                />
+                <QIcon
+                  name="videocam_off"
+                  v-if="producer.kind == 'video' && producer.producerInfo.paused"></QIcon>
+                <video
+                  v-if="!producer.producerInfo.paused"
+                  :ref="(el) => { producerVideoTags[producer.producerId] = el as HTMLAudioElement }"
                   autoplay
                 />
               </template>
@@ -160,6 +168,7 @@ const clientProducers = computed(() => {
 const soundOn = ref<boolean>(false);
 // NOTE: This is a bit hacky since well be left with dangling keys when the audioelements are removed from the dom.
 const producerAudioTags = ref<Record<string, HTMLAudioElement>>({});
+const producerVideoTags = ref<Record<string, HTMLAudioElement>>({});
 let consumedProducers: Record<string, string> = {};
 watch(clientProducers, (producers) => {
   console.log('clientProducers watcher triggered:', producers);
@@ -180,7 +189,7 @@ async function updateProducelistAndConsumeThem (producers: (typeof props.clients
       continue;
     }
     if (producer.producerInfo?.paused) {
-      console.log('this producer is paused. Will not cosumer it.');
+      console.log('this producer is paused. Will not cosume it.');
       continue;
     }
 
@@ -192,8 +201,12 @@ async function updateProducelistAndConsumeThem (producers: (typeof props.clients
     console.log('this producer was not conumsed. Adding it!');
     const { consumerId, track } = await peer.consume(producer.producerId);
     addedConsumedProducers[producer.producerId] = consumerId;
-    const audioStream = new MediaStream([track]);
-    if (producerAudioTags.value[producer.producerId]) producerAudioTags.value[producer.producerId].srcObject = audioStream;
+    console.log('##### producer:');
+    console.log(producer);
+    console.log('kind:' + producer.kind);
+    const mediaStream = new MediaStream([track]);
+    if (producer.kind === 'audio' && producerAudioTags.value[producer.producerId]) producerAudioTags.value[producer.producerId].srcObject = mediaStream;
+    if (producer.kind === 'video' && producerVideoTags.value[producer.producerId]) producerVideoTags.value[producer.producerId].srcObject = mediaStream;
   }
 
   consumedProducers = { ...addedConsumedProducers, ...consumedProducers };
