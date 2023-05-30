@@ -117,8 +117,17 @@
       <QBtn
         :disable="currentMuteState === 'forceMuted'"
         :icon="muteStateIcons[currentMuteState]"
+        :color="(currentMuteState==='unmuted'?'primary':'')"
         round
         @click="toggleMute"
+      >
+        <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
+      </QBtn>
+      <QBtn
+        :icon="(videoEnabled?'videocam':'videocam_off')"
+        :color="(videoEnabled?'primary':'')"
+        round
+        @click="toggleVideo"
       >
         <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
       </QBtn>
@@ -255,6 +264,25 @@ peer.on('notifyCloseEvent', (payload) => {
   }
 });
 
+const videoEnabled = ref<boolean>(false);
+
+async function toggleVideo () {
+  videoEnabled.value = !videoEnabled.value;
+  if (videoEnabled.value) {
+    if (!videoProducerId) {
+      const videoStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: true,
+      });
+      videoProducerId = await peer.produce(videoStream.getVideoTracks()[0]);
+    } else {
+      peer.resumeProducer(videoProducerId);
+    }
+  } else {
+    peer.pauseProducer(videoProducerId);
+  }
+}
+
 const muteStateIcons = {
   unmuted: 'mic',
   muted: 'mic_off',
@@ -268,12 +296,19 @@ const currentMuteState = computed(() => {
   }
   // if (!peer.producers.size || Array.from(peer.producers.values())[0].paused) {
   const producerArr = Object.values(soupStore.clientState.producers);
-  if (!producerArr.length || producerArr[0].producerInfo?.paused) {
+  let activeAudioFound = false;
+  producerArr.forEach(producer => {
+    if (producer.kind === 'audio' && !producer.producerInfo?.paused) {
+      activeAudioFound = true;
+    }
+  });
+  if (!activeAudioFound) {
     return 'muted';
   }
   return 'unmuted';
 });
 let audioProducerId: string;
+let videoProducerId: string;
 async function toggleMute () {
   switch (currentMuteState.value) {
     case 'forceMuted': {
@@ -285,13 +320,16 @@ async function toggleMute () {
           audio: true,
           video: false,
         });
+        console.log('Unmuting with new audio stream');
         audioProducerId = await peer.produce(microphoneStream.getAudioTracks()[0]);
       } else {
+        console.log('Unmuting by resuming audio stream');
         peer.resumeProducer(audioProducerId);
       }
       break;
     }
     case 'unmuted': {
+      console.log('Muting by pausing audio stream');
       // peer.closeAndNotifyProducer(audioProducerId);
       peer.pauseProducer(audioProducerId);
     }
