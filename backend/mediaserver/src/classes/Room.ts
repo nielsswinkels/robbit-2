@@ -200,6 +200,12 @@ export default class Room {
         promises.push(promise);
       }
     });
+    if (this.robot) {
+      if (!minimumRoleForReceivers || hasAtLeastSecurityLevel(this.robot.role, minimumRoleForReceivers)) {
+        const promise = this.robot.sendRequest(request, timeoutMillis);
+        promises.push(promise);
+      }
+    }
     return Promise.race(promises);
   }
 
@@ -213,5 +219,9 @@ export default class Room {
       const msg = createMessage('roomStateUpdated', { newState: this.roomState, reason: updateReason });
       client.send(msg);
     });
+    if (this.robot) {
+      const msg = createMessage('roomStateUpdated', { newState: this.roomState, reason: updateReason });
+      this.robot.send(msg);
+    }
   }
 }
