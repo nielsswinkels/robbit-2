@@ -336,10 +336,10 @@ async function toggleMute () {
   }
 }
 
-const showVRVideoFrame = computed(() => {
-  // return shareInVR.value && screenShareConsumerId.value !== undefined;
-  return screenshareWindowMode.value === 'vr' && screenShareConsumerId.value !== undefined;
-});
+// const showVRVideoFrame = computed(() => {
+//   // return shareInVR.value && screenShareConsumerId.value !== undefined;
+//   return screenshareWindowMode.value === 'vr' && screenShareConsumerId.value !== undefined;
+// });
 
 // TODO: This will not protect from clients "stealing" the broadcasting of the screenshare
 // We should change our produce code to assign the screenshare as a "mainproducer" instead. This will give better protection against script kiddies :-D
@@ -699,7 +699,7 @@ onUnmounted(() => {
   // }
 })();
 
-const cameraTag = ref<HTMLElement>();
+// const cameraTag = ref<HTMLElement>();
 // const videoRotaterTag = ref<Entity>();
 // document.addEventListener('pointermove', (ev) => {
 //   if (!videoIsGrabbed.value) return;

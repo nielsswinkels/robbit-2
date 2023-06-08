@@ -1,5 +1,230 @@
 <template>
-  <div class="q-ml-md q-mt-md row no-wrap items-center">
+  <QLayout view="hHh lpR fFf">
+    <QDrawer
+      v-model="leftDrawerOpen"
+      side="left"
+      overlay
+      bordered
+    >
+      <QList bordered>
+        <QItem>
+          <QItemSection avatar>
+            <QIcon
+              color="primary"
+              name="smart_toy"
+            />
+          </QItemSection>
+
+          <QItemSection
+            v-if="!editingRoomName"
+            @click="editingRoomName = true"
+          >
+            {{ (soupStore.roomState?.roomName? soupStore.roomState?.roomName : 'No name!') }}
+          </QItemSection>
+          <QItemSection
+            v-else
+          >
+            {{ (soupStore.roomState?.roomName? soupStore.roomState?.roomName : 'No name!') }}
+            <QForm
+              @submit.prevent="saveRoomName"
+            >
+              <QInput
+                v-model="inputRoomName"
+                outlined
+                dense
+              />
+              <QBtn
+                icon="save"
+                round
+                color="primary"
+                type="submit"
+              />
+              <QBtn
+                round
+                icon="cancel"
+                color="negative"
+                @click="editingRoomName = false"
+              />
+            </QForm>
+          </QItemSection>
+        </QItem>
+        <QItem
+          clickable
+          v-ripple
+          @click="toggleOpenRoom"
+        >
+          <QItemSection avatar>
+            <QIcon
+              :name="(roomIsOpen?'door_front':'lock')"
+              :color="(roomIsOpen?'positive':'negative')"
+            />
+          </QItemSection>
+
+          <QItemSection>
+            {{ (roomIsOpen?'Robbit är öppet':'Robbit är stängd') }}
+            <!-- <QToggle
+              v-model="roomIsOpen"
+              :label="roomIsOpen?'Robbit är öppet':'Robbit är stängd'"
+              unchecked-icon="lock"
+              checked-icon="door_front"
+              :color="roomIsOpen?'positive':'negative'"
+              keep-color
+            /> -->
+            <!-- @click="toggleOpenRoom" -->
+          </QItemSection>
+        </QItem>
+        <QItem
+          clickable
+          v-ripple
+          @click="getBluetoothDevice()"
+        >
+          <QItemSection avatar>
+            <QIcon
+              :name="(bleConnected?'bluetooth_connected':'bluetooth_disabled')"
+              :color="(bleConnected?'positive':'negative')"
+            />
+          </QItemSection>
+
+          <QItemSection>{{ (bleConnected?'Bluetooth ansluten':'Bluetooth frånkopplad') }}</QItemSection>
+        </QItem>
+        <QItem
+          clickable
+          v-ripple
+        >
+          <QItemSection avatar>
+            <QIcon
+              color="primary"
+              name="videocam"
+            />
+          </QItemSection>
+
+          <QItemSection>
+            <!-- label="Välj din kamera från nedanstående lista av anslutna video-enheter"
+            tooltip="Om du inte väljer en videokälla kommer mottagarna inte se något" -->
+            <DevicePicker
+              style="min-width: 15rem;"
+              media-type="videoinput"
+              @deviceselected="onVideoPicked"
+            />
+          </QItemSection>
+        </QItem>
+        <QItem
+          clickable
+          v-ripple
+        >
+          <QItemSection avatar>
+            <QIcon
+              color="primary"
+              name="mic"
+            />
+          </QItemSection>
+
+          <QItemSection>
+            <!-- label="Välj din ljudkälla"
+            tooltip="Om du inte väljer en ljudkälla kommer mottagarna inte höra dig" -->
+            <DevicePicker
+              style="min-width: 15rem;"
+              media-type="audioinput"
+              @deviceselected="onAudioPicked"
+            />
+          </QItemSection>
+        </QItem>
+        <QItem
+          clickable
+          v-ripple
+          @click="toggleFullscreen"
+        >
+          <QItemSection avatar>
+            <QIcon
+              color="primary"
+              :name="($q.fullscreen.isActive? 'fullscreen_exit': 'fullscreen')"
+            />
+          </QItemSection>
+
+          <QItemSection>
+            {{ ($q.fullscreen.isActive? 'Avsluta helskärm': 'Helskärm') }}
+          </QItemSection>
+        </QItem>
+        <QItem
+          clickable
+          v-ripple
+          :to="{name: 'controlStart'}"
+        >
+          <QItemSection avatar>
+            <QIcon
+              color="primary"
+              name="logout"
+            />
+          </QItemSection>
+
+          <QItemSection>
+            Exit
+          </QItemSection>
+        </QItem>
+      </QList>
+    </QDrawer>
+    <QDrawer
+      v-model="rightDrawerOpen"
+      side="right"
+      overlay
+      bordered
+    >
+      <ClientList
+        v-if="soupStore.roomState && soupStore.roomState.clients && soupStore.clientId"
+        @client-removed="kickClient"
+        class="col-4 q-mr-md"
+        :clients="soupStore.roomState?.clients"
+        :client-id="soupStore.clientId"
+      />
+    </QDrawer>
+    <QPageContainer>
+      <div
+        class="absolute-top-right q-ma-xs"
+        style="width: fit-content; max-width: 25%;"
+      >
+        <video
+          ref="videoTag"
+          autoplay
+          style="max-width: 100%; background-color: darkcyan;"
+        />
+      </div>
+      <div>
+        Hej ho!!
+      </div>
+    </QPageContainer>
+    <QFooter
+      bordered
+      class="bg-grey-8 text-white"
+    >
+      <QToolbar>
+        <QIcon
+          name="menu"
+          size="lg"
+          @click="toggleLeftDrawer"
+        />
+        <QToolbarTitle>
+          <QAvatar>
+            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+          </QAvatar>
+        </QToolbarTitle>
+        <div
+          @click="toggleRightDrawer"
+        >
+          <div>
+            {{ (soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0') }}
+          </div>
+          <QIcon
+            name="people"
+            size="lg"
+          />
+        </div>
+      </QToolbar>
+    </QFooter>
+  </QLayout>
+  <!-- <div
+    v-if="false"
+    class="q-ml-md q-mt-md row no-wrap items-center"
+  >
     <QBtn
       :to="{name: 'controlStart'}"
       icon="arrow_back"
@@ -9,10 +234,12 @@
     <div class="text-h3 q-ml-md">
       Robbit
     </div>
-  </div>
-  <div
+  </div> -->
+  <!-- <div
+    v-if="false"
     class="row q-ma-md"
   >
+    hej
     <ClientList
       v-if="soupStore.roomState && soupStore.roomState.clients && soupStore.clientId"
       @client-removed="kickClient"
@@ -26,7 +253,7 @@
         class="row items-center q-gutter-sm"
       >
         <div class="text-h5">
-          Namn!: {{ soupStore.roomState?.roomName }}
+          Namn: {{ soupStore.roomState?.roomName }}
         </div>
         <QBtn
           round
@@ -83,7 +310,7 @@
         <QIcon
           :name="(bleConnected?'bluetooth_connected':'bluetooth_disabled')"
           :color="(bleConnected?'positive':'negative')"
-        ></QIcon>
+        />
         <DevicePicker
           label="Välj din kamera från nedanstående lista av anslutna video-enheter"
           tooltip="Om du inte väljer en videokälla kommer mottagarna inte se något"
@@ -110,7 +337,7 @@
         </div>
       </QCardSection>
     </QCard>
-  </div>
+  </div> -->
 </template>
 
 <script setup lang="ts">
@@ -146,16 +373,48 @@ const videoInfo = ref<VideoInfo>();
 const userStore = useUserStore();
 const persistedStore = usePersistedStore();
 
+const leftDrawerOpen = ref(false);
+const rightDrawerOpen = ref(false);
+
 const roomIsOpen = ref<boolean>(false);
 
 const bleDevice = ref<BluetoothDevice>();
 const bleServices = ref<Services>();
 const bleConnected = ref<boolean>(false);
 
+function toggleLeftDrawer () {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function toggleRightDrawer () {
+  rightDrawerOpen.value = !rightDrawerOpen.value;
+}
+
+function toggleFullscreen () {
+  if ($q.fullscreen.isActive) {
+    $q.fullscreen.exit()
+      .then(() => {
+        console.log('Leaving fullscreen');
+      })
+      .catch(err => {
+        console.log('Can\'t leave fullscreen because ' + err);
+      });
+  } else {
+    $q.fullscreen.request()
+      .then(() => {
+        console.log('Going fullscreen');
+      })
+      .catch(err => {
+        console.log('Can\'t go fullscreen because ' + err);
+      });
+  }
+}
+
 function toggleOpenRoom () {
   if (!soupStore.roomId) {
     throw Error('no good');
   }
+  roomIsOpen.value = !roomIsOpen.value;
   peer.setCustomRoomProperties(soupStore.roomId, { doorIsOpen: roomIsOpen.value });
 }
 
@@ -199,11 +458,15 @@ const inputRoomName = ref(soupStore.roomState?.roomName);
 
 async function saveRoomName () {
   if (!soupStore.roomId) {
-    console.warn('roomId empty! cant save room name');
+    console.warn('roomId empty! Cant save room name');
     return;
   }
-  if (inputRoomName.value === undefined) {
-    console.warn('roomname was undefined. cant save it');
+  if (inputRoomName.value?.trim() === undefined) {
+    console.warn('Roomname was undefined. Cant save it');
+    return;
+  }
+  if (inputRoomName.value?.trim() === '') {
+    console.warn('Roomname was empty. Cant save it');
     return;
   }
   await peer.setRoomName(soupStore.roomId, inputRoomName.value);

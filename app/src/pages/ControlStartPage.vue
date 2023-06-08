@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed-center column q-gutter-xl items-end">
+  <div class="column q-my-xl q-gutter-md items-center">
     <QBtn
       color="primary"
       outline
