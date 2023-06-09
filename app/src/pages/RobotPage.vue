@@ -56,7 +56,7 @@
           <QItemSection avatar>
             <QIcon
               :name="(roomIsOpen?'door_front':'lock')"
-              :color="(roomIsOpen?'positive':'negative')"
+              :color="(roomIsOpen?'primary':'negative')"
             />
           </QItemSection>
 
@@ -81,7 +81,7 @@
           <QItemSection avatar>
             <QIcon
               :name="(bleConnected?'bluetooth_connected':'bluetooth_disabled')"
-              :color="(bleConnected?'positive':'negative')"
+              :color="(bleConnected?'primary':'negative')"
             />
           </QItemSection>
 
@@ -178,19 +178,43 @@
       />
     </QDrawer>
     <QPageContainer>
-      <div
-        class="absolute-top-right q-ma-xs"
-        style="width: fit-content; max-width: 25%;"
+      <QPage
+        class="column"
       >
-        <video
-          ref="videoTag"
-          autoplay
-          style="max-width: 100%; background-color: darkcyan;"
-        />
-      </div>
-      <div>
-        Hej ho!!
-      </div>
+        <div
+          class="absolute-top-right"
+          style="width: fit-content; max-width: 25%;"
+        >
+          <video
+            ref="videoTag"
+            autoplay
+            style="max-width: 100%; background-color: darkcyan; border-bottom-left-radius: 2em;"
+          />
+        </div>
+        <div
+          class="col column items-stretch justify-center"
+        >
+          <div
+            v-if="(soupStore.roomState && soupStore.roomState.clients && Object.keys(soupStore.roomState.clients).length === 0)"
+            class="col column justify-center items-center q-gutter-md"
+          >
+            <div
+              class="text-h1"
+            >
+              😴
+            </div>
+            <div>
+              Robbit sover i väntan på att någon ansluter..
+            </div>
+          </div>
+          <ClientCameras
+            v-if="soupStore.roomState && soupStore.roomState.clients && soupStore.clientId && Object.keys(soupStore.roomState.clients).length > 0"
+            class="col"
+            :clients="soupStore.roomState?.clients"
+            :client-id="soupStore.clientId"
+          />
+        </div>
+      </QPage>
     </QPageContainer>
     <QFooter
       bordered
@@ -351,6 +375,7 @@ import { useQuasar } from 'quasar';
 import { asyncDialog } from 'src/modules/utilFns';
 import { getAllGatherings } from 'src/modules/authClient';
 import ClientList from 'src/components/ClientList.vue';
+import ClientCameras from 'src/components/ClientCameras.vue';
 import { extractMessageFromCatch } from 'shared-modules/utilFns';
 import { createResponse } from 'shared-types/MessageTypes';
 import { Services, getServices, requestMicrobit } from 'microbit-web-bluetooth';
