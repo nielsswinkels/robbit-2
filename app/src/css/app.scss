@@ -18,3 +18,25 @@ $heading-scale: .3; // amount headings shrink from h1 to h6
     margin-bottom: 0.4rem + 0.2 * (7 - $i);
   }
 }
+
+.debug-red {
+  border: 1px solid red;
+}
+.debug-blue {
+  border: 1px solid blue;
+}
+.debug-yellow {
+  border: 1px solid yellow;
+}
+.debug-green {
+  border: 1px solid green;
+}
+.debug-cyan {
+  border: 1px solid cyan;
+}
+.debug-purple {
+  border: 1px solid purple;
+}
+.debug-pink {
+  border: 1px solid pink;
+}
