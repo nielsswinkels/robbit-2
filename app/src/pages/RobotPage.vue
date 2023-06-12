@@ -106,6 +106,18 @@
               media-type="videoinput"
               @deviceselected="onVideoPicked"
             />
+            <div
+              class="row justify-evenly"
+            >
+              <QBtn
+                icon="video_camera_front"
+                @click="getMobileVideo(true)"
+              />
+              <QBtn
+                icon="video_camera_back"
+                @click="getMobileVideo(false)"
+              />
+            </div>
           </QItemSection>
         </QItem>
         <QItem
@@ -240,34 +252,6 @@
         </QPageSticky>
       </QPage>
     </QPageContainer>
-    <!-- <QFooter
-      bordered
-      class="bg-grey-8 text-white"
-    >
-      <QToolbar>
-        <QIcon
-          name="menu"
-          size="lg"
-          @click="toggleLeftDrawer"
-        />
-        <QToolbarTitle>
-          <QAvatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-          </QAvatar>
-        </QToolbarTitle>
-        <div
-          @click="toggleRightDrawer"
-        >
-          <div>
-            {{ (soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0') }}
-          </div>
-          <QIcon
-            name="people"
-            size="lg"
-          />
-        </div>
-      </QToolbar>
-    </QFooter> -->
   </QLayout>
   <!-- <div
     v-if="false"
