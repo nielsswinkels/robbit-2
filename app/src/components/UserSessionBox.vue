@@ -16,7 +16,7 @@
         flat
         icon="logout"
         round
-        @click="router.replace('/logout')"
+        @click="logOut"
       >
         <QTooltip class="bg-primary text-white">
           Logga ut
@@ -29,9 +29,28 @@
 <script setup lang="ts">
 import { useUserStore } from 'src/stores/userStore';
 import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
 
 const userStore = useUserStore();
 const router = useRouter();
+const $q = useQuasar();
+
+function logOut () {
+  exitFullscreen();
+  router.replace('/logout');
+}
+
+function exitFullscreen () {
+  if ($q.fullscreen.isActive) {
+    $q.fullscreen.exit()
+      .then(() => {
+        console.log('Leaving fullscreen');
+      })
+      .catch(err => {
+        console.log('Can\'t leave fullscreen because ' + err);
+      });
+  }
+}
 
 </script>
 
