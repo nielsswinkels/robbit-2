@@ -9,15 +9,15 @@
   />
   <div class="fixed-center">
     <h4
-      v-if="!soupStore.rooms"
+      v-if="!soupStore.rooms || Object.keys(soupStore.rooms).length <= 0"
       class="text-center"
     >
-      Inga rum aktiva just nu.<br>
-      Om något rum startas visas det här.
+      Inga Robbitar aktiva just nu.<br>
+      Om någon Robbit startas visas det här.
     </h4>
     <template v-else>
       <h3 class="text-center">
-        Aktiva rum just nu:
+        Aktiva Robbitar just nu:
       </h3>
       <QCard>
         <QList id="room-list">
