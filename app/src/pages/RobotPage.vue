@@ -157,6 +157,24 @@
             {{ ($q.fullscreen.isActive? 'Avsluta helskärm': 'Helskärm') }}
           </QItemSection>
         </QItem>
+        <QItem>
+          <QItemSection avatar>
+            <QIcon
+              color="primary"
+              name="lens_blur"
+            />
+          </QItemSection>
+          <QItemSection avatar>
+            {{ selfviewOpacity }}%
+          </QItemSection>
+          <QItemSection>
+            <QSlider
+              v-model="selfviewOpacity"
+              :min="0"
+              :max="100"
+            />
+          </QItemSection>
+        </QItem>
         <QItem
           clickable
           v-ripple
@@ -195,7 +213,7 @@
       >
         <div
           class="absolute-top-right"
-          style="width: fit-content; max-width: 25%; opacity: 50%;"
+          :style="'width: fit-content; max-width: 25%; opacity: ' + selfviewOpacity + '%;'"
         >
           <video
             ref="videoTag"
@@ -415,6 +433,8 @@ const rightDrawerOpen = ref(false);
 const hideUI = ref(false);
 const hideUITimeout = ref<number>();
 const hideUITimeoutDuration = 10000;
+
+const selfviewOpacity = ref<number>(50);
 
 const roomIsOpen = ref<boolean>(false);
 
