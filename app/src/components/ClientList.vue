@@ -40,22 +40,15 @@
                 v-for="(producer, key) in client.producers"
                 :key="key"
               >
-                <span
-                  class="emoji"
-                  v-if="producer.kind === 'video'"
-                >🎥</span>
                 <audio
-                :ref="(el) => { producerAudioTags[producer.producerId] = el as HTMLAudioElement }"
-                autoplay
+                  :ref="(el) => { producerAudioTags[producer.producerId] = el as HTMLAudioElement }"
+                  autoplay
                 />
-                <QIcon
-                  name="videocam_off"
-                  v-if="producer.kind == 'video' && producer.producerInfo.paused"></QIcon>
-                <video
+                <!-- <video
                   v-if="!producer.producerInfo.paused"
                   :ref="(el) => { producerVideoTags[producer.producerId] = el as HTMLAudioElement }"
                   autoplay
-                />
+                /> -->
               </template>
             </div>
           </QItemSection>
@@ -72,19 +65,23 @@
             side
           >
             <div class="q-gutter-sm">
+              <QIcon
+                :name="(client.videoEnabled? 'videocam': 'videocam_off')"
+                size="md"
+              />
+              <!-- :label="client.muteLabel" -->
               <QBtn
                 dense
                 rounded
-                :label="client.muteLabel"
                 :icon="client.muteIcon"
                 @click="toggleConsume(client)"
               >
                 <QTooltip>Sätt på / stäng av användarens mikrofon</QTooltip>
               </QBtn>
+              <!-- label="släng ut" -->
               <QBtn
                 dense
                 rounded
-                label="släng ut"
                 icon="person_remove"
                 text-color="negative"
                 @click="$emit('clientRemoved', client.clientId)"
@@ -127,11 +124,12 @@ const clientsWithMuteState = computed(() => {
     }
     // if(Object.keys(client.producers).length === 0) {
     const producererArr = Object.values(client.producers);
-    if (!producererArr.length || producererArr[0].producerInfo?.paused) {
-      return 'muted';
-    } else {
-      return 'unmuted';
+    for (const producer of producererArr) {
+      if (producer.kind === 'audio' && !producer.producerInfo?.paused) {
+        return 'unmuted';
+      }
     }
+    return 'muted';
   };
 
   const getMuteLabel = (muteState: ReturnType<typeof getMuteState>) => {
@@ -145,9 +143,20 @@ const clientsWithMuteState = computed(() => {
     }
   };
 
+  const getVideoEnabled = (client: ClientState) => {
+    const producererArr = Object.values(client.producers);
+    for (const producer of producererArr) {
+      if (producer.kind === 'video' && !producer.producerInfo?.paused) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const clients = Object.values(props.clients).map(client => {
     const muteState = getMuteState(client);
-    return { ...client, muteState, muteIcon: muteStateToIcon[muteState], muteLabel: getMuteLabel(muteState) };
+    const videoEnabled = getVideoEnabled(client);
+    return { ...client, muteState, muteIcon: muteStateToIcon[muteState], muteLabel: getMuteLabel(muteState), videoEnabled };
   });
   return clients.sort((clientA, _clientB) => {
     if (clientA.role === 'client') return 1;
@@ -165,7 +174,7 @@ const clientProducers = computed(() => {
   return producers;
 });
 
-const soundOn = ref<boolean>(false);
+const soundOn = ref<boolean>(true);
 // NOTE: This is a bit hacky since well be left with dangling keys when the audioelements are removed from the dom.
 const producerAudioTags = ref<Record<string, HTMLAudioElement>>({});
 const producerVideoTags = ref<Record<string, HTMLAudioElement>>({});

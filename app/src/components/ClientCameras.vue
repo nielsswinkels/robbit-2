@@ -1,7 +1,7 @@
 <template>
   <!-- class="col row justify-stretch items-stretch" -->
   <div
-    class="debug-purple client-grid-container window-height"
+    class=" client-grid-container window-height"
     :style="'grid-template-columns: repeat(' + clientsPerRow + ', 1fr); grid-template-rows: repeat(' + Math.ceil(Object.keys(clientsWithMuteState).length / clientsPerRow) + ', 1fr);'"
   >
     <template
@@ -13,6 +13,14 @@
         class="client-view"
         style="max-height:100% !important; height:100% !important; min-width: 0; min-height: 0"
       >
+        <QIcon
+          class="absolute-right q-mr-lg q-my-auto"
+          size="xl"
+          id="hand-icon"
+          color="yellow"
+          v-if="client.customProperties.handRaised"
+          name="waving_hand"
+        />
         <div
           class="absolute-bottom-right q-ma-xs"
         >
@@ -33,7 +41,7 @@
             class="client-video"
             v-if="producer.kind == 'video'"
             v-show="client.videoEnabled"
-            :ref="(el) => { producerVideoTags[producer.producerId] = el as HTMLAudioElement }"
+            :ref="(el) => { producerVideoTags[producer.producerId] = el as HTMLVideoElement }"
             autoplay
             muted
           />

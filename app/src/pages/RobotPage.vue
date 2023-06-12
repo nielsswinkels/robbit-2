@@ -191,11 +191,11 @@
     </QDrawer>
     <QPageContainer>
       <QPage
-        class="column debug-green"
+        class="column"
       >
         <div
           class="absolute-top-right"
-          style="width: fit-content; max-width: 25%;"
+          style="width: fit-content; max-width: 25%; opacity: 50%;"
         >
           <video
             ref="videoTag"
