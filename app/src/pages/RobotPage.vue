@@ -179,7 +179,7 @@
     </QDrawer>
     <QPageContainer>
       <QPage
-        class="column"
+        class="column debug-green"
       >
         <div
           class="absolute-top-right"
@@ -193,6 +193,7 @@
         </div>
         <div
           class="col column items-stretch justify-center"
+          style="max-height:100vh"
         >
           <div
             v-if="(soupStore.roomState && soupStore.roomState.clients && Object.keys(soupStore.roomState.clients).length === 0)"
@@ -214,9 +215,32 @@
             :client-id="soupStore.clientId"
           />
         </div>
+        <QPageSticky
+          position="bottom-left"
+          :offset="[18, 18]"
+        >
+          <QBtn
+            size="md"
+            icon="menu"
+            color="secondary"
+            @click="toggleLeftDrawer"
+          />
+        </QPageSticky>
+        <QPageSticky
+          position="bottom-right"
+          :offset="[18, 18]"
+        >
+          <QBtn
+            size="md"
+            icon-right="people"
+            color="secondary"
+            @click="toggleRightDrawer"
+            :label="(soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0')+' '"
+          />
+        </QPageSticky>
       </QPage>
     </QPageContainer>
-    <QFooter
+    <!-- <QFooter
       bordered
       class="bg-grey-8 text-white"
     >
@@ -243,7 +267,7 @@
           />
         </div>
       </QToolbar>
-    </QFooter>
+    </QFooter> -->
   </QLayout>
   <!-- <div
     v-if="false"
@@ -647,8 +671,8 @@ async function pickGathering (gatherings: string[]): Promise<string> {
 async function chooseRoomName (): Promise<string> {
   // console.log(gatheringResponse);
   const dialogPromise = asyncDialog({
-    title: 'Rumsnamn',
-    message: 'Välj ett namn för rummet:',
+    title: 'Robbitnamn',
+    message: 'Välj ett namn för din Robbit:',
     // persistent: true,
     noBackdropDismiss: true,
     noEscDismiss: true,

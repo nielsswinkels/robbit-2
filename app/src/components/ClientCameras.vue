@@ -1,38 +1,41 @@
 <template>
+  <!-- class="col row justify-stretch items-stretch" -->
   <div
-    class="col row justify-stretch items-stretch"
+    class="debug-purple client-grid-container window-height"
+    :style="'grid-template-columns: repeat(' + clientsPerRow + ', 1fr); grid-template-rows: repeat(' + Math.ceil(Object.keys(clientsWithMuteState).length / clientsPerRow) + ', 1fr);'"
   >
-    <!-- style="width:100%;" -->
     <template
       v-for="client in clientsWithMuteState"
       :key="client.clientId"
     >
       <div
         v-if="client.clientId !== clientId"
-        :class="clientsColClass + ' client-camera'"
+        class="client-view"
+        style="max-height:100% !important; height:100% !important; min-width: 0; min-height: 0"
       >
         <div
           class="absolute-bottom-right q-ma-xs"
         >
-          <!-- style="position: absolute; bottom: 0px; right: 0px;" -->
           {{ client.username }}
+          <QIcon
+            name="videocam_off"
+            v-if="!client.videoEnabled"
+          />
+          <QIcon
+            :name="client.muteIcon"
+          />
         </div>
         <template
           v-for="(producer, key) in client.producers"
           :key="key"
         >
-          <!-- has {{ producer.kind }} -->
-          <!-- (producer.producerInfo && !producer.producerInfo.paused) &&  -->
           <video
+            class="client-video"
             v-if="producer.kind == 'video'"
-            v-show="(producer.producerInfo && !producer.producerInfo.paused)"
+            v-show="client.videoEnabled"
             :ref="(el) => { producerVideoTags[producer.producerId] = el as HTMLAudioElement }"
             autoplay
             muted
-          />
-          <QIcon
-            name="videocam_off"
-            v-if="producer.kind == 'video' && producer.producerInfo && producer.producerInfo.paused"
           />
         </template>
       </div>
@@ -42,7 +45,7 @@
 
 <script setup lang="ts">
 import { ClientState, RoomState } from 'shared-types/CustomTypes';
-import { hasAtLeastSecurityLevel } from 'shared-modules/authUtils';
+// import { hasAtLeastSecurityLevel } from 'shared-modules/authUtils';
 import { ref, computed, watch } from 'vue';
 import usePeerClient from 'src/composables/usePeerClient';
 
@@ -68,11 +71,12 @@ const clientsWithMuteState = computed(() => {
     }
     // if(Object.keys(client.producers).length === 0) {
     const producererArr = Object.values(client.producers);
-    if (!producererArr.length || producererArr[0].producerInfo?.paused) {
-      return 'muted';
-    } else {
-      return 'unmuted';
+    for (const producer of producererArr) {
+      if (producer.kind === 'audio' && !producer.producerInfo?.paused) {
+        return 'unmuted';
+      }
     }
+    return 'muted';
   };
 
   const getMuteLabel = (muteState: ReturnType<typeof getMuteState>) => {
@@ -86,14 +90,42 @@ const clientsWithMuteState = computed(() => {
     }
   };
 
+  const getVideoEnabled = (client: ClientState) => {
+    const producererArr = Object.values(client.producers);
+    for (const producer of producererArr) {
+      if (producer.kind === 'video' && !producer.producerInfo?.paused) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const clients = Object.values(props.clients).map(client => {
     const muteState = getMuteState(client);
-    return { ...client, muteState, muteIcon: muteStateToIcon[muteState], muteLabel: getMuteLabel(muteState) };
+    const videoEnabled = getVideoEnabled(client);
+    return { ...client, muteState, muteIcon: muteStateToIcon[muteState], muteLabel: getMuteLabel(muteState), videoEnabled };
   });
   return clients.sort((clientA, _clientB) => {
     if (clientA.role === 'client') return 1;
     return -1;
   });
+});
+
+const clientsPerRow = computed(() => {
+  console.log('clientsColClass' + Object.keys(props.clients).length);
+  if (Object.keys(props.clients).length <= 1) {
+    return 1;
+  } else if (Object.keys(props.clients).length <= 4) {
+    return 2;
+  } else if (Object.keys(props.clients).length <= 6) {
+    return 3;
+  } else if (Object.keys(props.clients).length <= 8) {
+    return 4;
+  } else if (Object.keys(props.clients).length <= 9) {
+    return 3;
+  } else {
+    return 4;
+  }
 });
 
 const clientsColClass = computed(() => {
@@ -109,7 +141,7 @@ const clientsColClass = computed(() => {
   } else if (Object.keys(props.clients).length <= 9) {
     return 'col-4';
   } else {
-    return 'col-4';
+    return 'col-3';
   }
 });
 
@@ -199,10 +231,27 @@ async function toggleConsume (client: (typeof clientsWithMuteState.value)[number
   font-size: large;
 }
 
-.client-camera {
+.client-view {
   position: relative;
   z-index: -1;
   background-color: $dark;
   border: 2px solid $primary;
+}
+
+.client-video {
+  min-width: 0;
+  min-height: 0;
+  max-width:100% !important;
+  max-height:100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow:hidden;
+  background-color: black;
+}
+
+.client-grid-container {
+  display: grid;
+  grid-auto-rows: 1fr;
+  height: 100vh;
 }
     </style>
