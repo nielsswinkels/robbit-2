@@ -1,5 +1,5 @@
 <template>
-  <QLayout view="hHh lpR fFf">
+  <QLayout view="hHh lpR fFf" @click="unHideUI">
     <QDrawer
       v-model="leftDrawerOpen"
       side="left"
@@ -230,6 +230,7 @@
         <QPageSticky
           position="bottom-left"
           :offset="[18, 18]"
+          :class="(hideUI? 'fade-out': '')"
         >
           <QBtn
             size="md"
@@ -241,6 +242,7 @@
         <QPageSticky
           position="bottom-right"
           :offset="[18, 18]"
+          :class="(hideUI? 'fade-out': '')"
         >
           <QBtn
             size="md"
@@ -388,6 +390,7 @@ import { extractMessageFromCatch } from 'shared-modules/utilFns';
 import { createResponse } from 'shared-types/MessageTypes';
 import { Services, getServices, requestMicrobit } from 'microbit-web-bluetooth';
 import type { BluetoothDevice } from 'web-bluetooth';
+import Timeout from 'await-timeout';
 
 const $q = useQuasar();
 const peer = usePeerClient();
@@ -409,11 +412,25 @@ const persistedStore = usePersistedStore();
 const leftDrawerOpen = ref(false);
 const rightDrawerOpen = ref(false);
 
+const hideUI = ref(false);
+const hideUITimeout = ref<number>();
+const hideUITimeoutDuration = 10000;
+
 const roomIsOpen = ref<boolean>(false);
 
 const bleDevice = ref<BluetoothDevice>();
 const bleServices = ref<Services>();
 const bleConnected = ref<boolean>(false);
+
+function unHideUI () {
+  hideUI.value = false;
+  if (hideUITimeout.value) {
+    window.clearTimeout(hideUITimeout.value);
+  }
+  hideUITimeout.value = window.setTimeout(() => {
+    hideUI.value = true;
+  }, hideUITimeoutDuration);
+}
 
 function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -571,6 +588,9 @@ onUnmounted(() => {
     // await Timeout.set(1500);
     // router.back();
   }
+  hideUITimeout.value = window.setTimeout(() => {
+    hideUI.value = true;
+  }, hideUITimeoutDuration);
 })();
 
 async function stopVideoTracks () {
@@ -841,5 +861,10 @@ peer.on('robotControl', (payload) => {
   bottom: 0;
   z-index: 80;
   background-color: rgba(231, 188, 255, 0.2);
+}
+
+.fade-out {
+    opacity: 0.3;
+    transition: opacity 2s linear;
 }
 </style>
