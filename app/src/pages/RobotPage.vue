@@ -588,6 +588,9 @@ onUnmounted(() => {
       $q.loading.show();
     }
     await enterGatheringAndRoom(gathering, persistedStore.roomName);
+    if (soupStore.roomState?.customProperties.doorIsOpen !== undefined) {
+      roomIsOpen.value = soupStore.roomState?.customProperties.doorIsOpen;
+    }
     $q.loading.hide();
 
     // This is a dirty and filthy hack to force audio and video permissions.

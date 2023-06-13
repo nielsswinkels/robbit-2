@@ -178,6 +178,7 @@ export default class Gathering {
     }
     const room = Room.createRoom({roomId, roomName, gathering: this});
     this.rooms.set(room.id, room);
+    room.setCustomProperties({doorIsOpen: true});
     this.broadCastGatheringState(undefined, 'room created');
 
     return room;
