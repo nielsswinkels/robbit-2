@@ -17,6 +17,7 @@ export interface ProducerInfo {
 export interface ClientProperties {
   handRaised?: boolean,
   forceMuted?: boolean,
+  chatMsg?: string,
   [key: string]: unknown,
 }
 

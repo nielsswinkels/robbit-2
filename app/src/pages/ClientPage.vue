@@ -22,6 +22,7 @@
           :key="client.clientId"
         >
           {{ client.username }}
+          {{ client.customProperties.chatMsg }}
           <template v-if="client.clientId === soupStore.clientState?.clientId">
             (du)
           </template>
@@ -110,71 +111,94 @@
       </a-scene>
     </div> -->
     <BottomPanel
-      class="col-shrink bg-dark row justify-end"
+      class="col-shrink bg-dark row justify-end debug-blue wrap"
       id="bottom-panel"
     >
       <!-- <QToolbarTitle class="debug-red">
         Robbit: <span class="text-info">{{ soupStore.roomState?.roomName }}</span>
       </QToolbarTitle> -->
-      <QBtn
-        class="col"
-        :disable="currentMuteState === 'forceMuted'"
-        :icon="muteStateIcons[currentMuteState]"
-        :color="(currentMuteState==='unmuted'?'primary':'')"
-        round
-        @click="toggleMute"
-      >
-        <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
-      </QBtn>
-      <QBtn
-        class="col"
-        :icon="(videoEnabled?'videocam':'videocam_off')"
-        :color="(videoEnabled?'primary':'')"
-        round
-        @click="toggleVideo"
-      >
-        <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
-      </QBtn>
-      <QToggle
-        class="col"
-        size="lg"
-        label="presentationsläge"
-        v-model="screenshareWindowMode"
-        toggle-indeterminate
-        indeterminate-value="big"
-        true-value="vr"
-        false-value="small"
-        indeterminate-icon="fullscreen"
-        checked-icon="3d_rotation"
-        unchecked-icon="fullscreen_exit"
-      />
-      <div class="col overflow-hidden">
-        <QBtn
-          id="raise-hand-button"
-          :class="{waving: handRaised}"
-          icon="waving_hand"
-          text-color="yellow"
-          round
-          @click="toggleRaiseHand"
-        />
-        <!-- <QBtn
-          id="look-up-button"
-          icon="arrow_upward"
-          round
-          @mousedown="servoAngleChange.value = 1"
-          @mouseup="servoAngleChange.value = 0"
-          @touchstart="servoAngleChange.value = 1"
-          @touchend="servoAngleChange.value = 0"
-        />
-        <QBtn
-          id="look-down-button"
-          icon="arrow_downward"
-          round00
-          @mousedown="servoAngleChange.value = -1"
-          @mouseup="servoAngleChange.value = 0"
-          @touchstart="servoAngleChange.value = -1"
-          @touchend="servoAngleChange.value = 0"
+      <div class="col-shrink row justify-evenly q-gutter-md no-wrap">
+        <QForm @submit="sendChat">
+          <QInput
+            class="col-grow"
+            v-model="chatInput"
+            outlined
+            ref="chatInputField"
+            @focus="chatHasFocus = true"
+            @blur="chatHasFocus = false"
+          >
+            <template #append>
+              <QBtn
+                icon="send"
+                color="primary"
+                flat
+                dense
+                round
+                @click="sendChat"
+              />
+            </template>
+          </QInput>
+        </QForm>
+        <div class="col column justify-between items-center">
+          <QBtn
+            :disable="currentMuteState === 'forceMuted'"
+            :icon="muteStateIcons[currentMuteState]"
+            :color="(currentMuteState==='unmuted'?'primary':'')"
+            :outline="currentMuteState!=='unmuted'"
+            round
+            @click="toggleMute"
+          >
+            <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
+          </QBtn>
+          <div class="col text-caption">
+            Mikrofon
+          </div>
+        </div>
+        <div class="col column items-center">
+          <!-- :color="(videoEnabled?'primary':'#a58440')" -->
+          <QBtn
+            :icon="(videoEnabled?'videocam':'videocam_off')"
+            :color="(videoEnabled?'primary':'')"
+            :outline="!videoEnabled"
+            round
+            @click="toggleVideo"
+          >
+            <QTooltip>Stäng av eller sätt på video</QTooltip>
+          </QBtn>
+          <div class="col text-caption">
+            Kamera
+          </div>
+        </div>
+        <!-- <QToggle
+          class="col"
+          size="lg"
+          label="presentationsläge"
+          v-model="screenshareWindowMode"
+          toggle-indeterminate
+          indeterminate-value="big"
+          true-value="vr"
+          false-value="small"
+          indeterminate-icon="fullscreen"
+          checked-icon="3d_rotation"
+          unchecked-icon="fullscreen_exit"
         /> -->
+        <div class="col overflow-hidden">
+          <QBtn
+            id="raise-hand-button"
+            :class="{waving: handRaised}"
+            :color="(handRaised? 'primary': '')"
+            :outline="!handRaised"
+            round
+            @click="toggleRaiseHand"
+          >
+            <QIcon
+              name="waving_hand"
+              color="yellow"
+              size="sm"
+            />
+            <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
+          </QBtn>
+        </div>
       </div>
       <div class="col-shrink row no-wrap">
         <div class="col-2 column justify-center items-center">
@@ -434,6 +458,25 @@ async function toggleRaiseHand () {
   });
 }
 
+const chatInput = ref('');
+const clearChatTimeout = ref<number>();
+const clearChatTimeoutDuration = 10000;
+
+const chatHasFocus = ref(false);
+const chatInputField = ref<HTMLInputElement>();
+
+function sendChat () {
+  peer.setCustomClientProperties({
+    chatMsg: chatInput.value,
+  });
+  chatInput.value = '';
+  clearChatTimeout.value = window.setTimeout(() => {
+    peer.setCustomClientProperties({
+      chatMsg: '',
+    });
+  }, clearChatTimeoutDuration);
+}
+
 let forwardActive: boolean;
 let reverseActive: boolean;
 let robotThrottle = 0;
@@ -512,74 +555,48 @@ function toggleSpeed () {
 
 function handleKeypress (event: KeyboardEvent) {
   // console.log(event);
-  // //Bail out if we're in the chat box
-  // if (document.activeElement.className.includes("text-input")) {
-  //   return;
-  // }
+  // console.log(event.key + ' ' + event.type);
 
   if (event.type === 'keydown') {
     switch (event.key) {
       case 'ArrowUp':
-        if (event.shiftKey) {
-          servoAngleChange.value = 1;
-          // console.log(servoAngleChange);
-        } else {
-          forwardActive = true;
-          document.getElementById('forward-button')?.click();
+        if (!chatHasFocus.value) {
+          if (event.shiftKey) {
+            servoAngleChange.value = 1;
+            // console.log(servoAngleChange);
+          } else {
+            forwardActive = true;
+            document.getElementById('forward-button')?.click();
+          }
         }
         break;
       case 'ArrowDown':
-        if (event.shiftKey) {
-          servoAngleChange.value = -1;
-        } else {
-          reverseActive = true;
-          document.getElementById('backward-button')?.click();
+        if (!chatHasFocus.value) {
+          if (event.shiftKey) {
+            servoAngleChange.value = -1;
+          } else {
+            reverseActive = true;
+            document.getElementById('backward-button')?.click();
+          }
         }
         break;
       case 'ArrowLeft':
-        robotRotation = -1;
-        document.getElementById('left-button')?.click();
+        if (!chatHasFocus.value) {
+          robotRotation = -1;
+          document.getElementById('left-button')?.click();
+        }
         break;
       case 'ArrowRight':
-        robotRotation = 1;
-        document.getElementById('right-button')?.click();
+        if (!chatHasFocus.value) {
+          robotRotation = 1;
+          document.getElementById('right-button')?.click();
+        }
         break;
       case 'a':
       case 'A':
         break;
       case 'z':
       case 'Z':
-        break;
-      case 'i':
-      case 'I':
-        // presentSettingsPopover(undefined);
-        break;
-      case 'e':
-      case 'E':
-        // if (!showCamera) {
-        //   presentEmojiPopover(undefined);
-        // }
-        break;
-      case 'k':
-      case 'K':
-        // toggleVideoTrack();
-        break;
-      case 'm':
-      case 'M':
-        // toggleAudioTrack();
-        break;
-      case 'r':
-      case 'R':
-        // toggleWaving();
-        toggleRaiseHand();
-        break;
-      case 'p':
-      case 'P':
-        toggleSpeed();
-        break;
-      case 'o':
-      case 'O':
-        // changeRobotCamera();
         break;
     }
   } else if (event.type === 'keyup') {
@@ -602,10 +619,53 @@ function handleKeypress (event: KeyboardEvent) {
         servoAngleChange.value = 0;
         reverseActive = false;
         break;
-      // case 'Escape':
-      //   console.log('Escape was pressed!!!!');
-      //   chatInput['_native'].nativeElement.blur();
-      //   break;
+      case 'k':
+      case 'K':
+        if (!chatHasFocus.value) {
+          toggleVideo();
+        }
+        break;
+      case 'm':
+      case 'M':
+        if (!chatHasFocus.value) {
+          toggleMute();
+        }
+        break;
+      case 'r':
+      case 'R':
+        if (!chatHasFocus.value) {
+          toggleRaiseHand();
+        }
+        break;
+      case 'p':
+      case 'P':
+        if (!chatHasFocus.value) {
+          toggleSpeed();
+        }
+        break;
+      case 'o':
+      case 'O':
+        // changeRobotCamera();
+        break;
+      case 'i':
+      case 'I':
+        // presentSettingsPopover(undefined);
+        break;
+      case 'e':
+      case 'E':
+        // if (!showCamera) {
+        //   presentEmojiPopover(undefined);
+        // }
+        break;
+      case 'c':
+      case 'C':
+        chatInputField.value?.focus();
+        break;
+      case 'Escape':
+        if (chatHasFocus.value) {
+          chatInputField.value?.blur();
+        }
+        break;
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <QToolbar class="q-gutter-x-md">
+  <QToolbar>
     <slot />
   </QToolBar>
 </template>

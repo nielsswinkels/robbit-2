@@ -30,7 +30,10 @@
 
 $primary   : #22b3b3; // rgb(255, 102, 0);
 
-$secondary : #cdb380; // #008bc2;
+$secondary : hsl(210, 68%, 42%); // #008bc2;
+$accent: #cdb380;
+
+$secondary-dark : #a58440; // #008bc2;
 
 $dark      : #031634; // #393e46;
 
@@ -38,6 +41,10 @@ $background: #222831;
 
 body.body--dark {
   background: $background;
+}
+
+.bg-secondary-dark {
+  background-color: $secondary-dark;
 }
 
 $positive  : #21BA45;

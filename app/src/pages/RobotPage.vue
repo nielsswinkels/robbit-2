@@ -87,10 +87,7 @@
 
           <QItemSection>{{ (bleConnected?'Bluetooth ansluten':'Bluetooth frånkopplad') }}</QItemSection>
         </QItem>
-        <QItem
-          clickable
-          v-ripple
-        >
+        <QItem>
           <QItemSection avatar>
             <QIcon
               color="primary"
@@ -112,18 +109,19 @@
               <QBtn
                 icon="video_camera_front"
                 @click="getMobileVideo(true)"
+                color="primary"
+                round
               />
               <QBtn
                 icon="video_camera_back"
                 @click="getMobileVideo(false)"
+                color="primary"
+                round
               />
             </div>
           </QItemSection>
         </QItem>
-        <QItem
-          clickable
-          v-ripple
-        >
+        <QItem>
           <QItemSection avatar>
             <QIcon
               color="primary"
@@ -253,7 +251,7 @@
           <QBtn
             size="md"
             icon="menu"
-            color="secondary"
+            color="primary"
             @click="toggleLeftDrawer"
           />
         </QPageSticky>
@@ -265,7 +263,7 @@
           <QBtn
             size="md"
             icon-right="people"
-            color="secondary"
+            color="primary"
             @click="toggleRightDrawer"
             :label="(soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0')+' '"
           />
@@ -432,7 +430,7 @@ const rightDrawerOpen = ref(false);
 
 const hideUI = ref(false);
 const hideUITimeout = ref<number>();
-const hideUITimeoutDuration = 10000;
+const hideUITimeoutDuration = 7000;
 
 const selfviewOpacity = ref<number>(50);
 
@@ -888,6 +886,6 @@ peer.on('robotControl', (payload) => {
 
 .fade-out {
     opacity: 0.3;
-    transition: opacity 2s linear;
+    transition: opacity 4s linear;
 }
 </style>
