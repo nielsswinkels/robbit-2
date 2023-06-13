@@ -110,11 +110,14 @@
       </a-scene>
     </div> -->
     <BottomPanel
-      class="col-shrink bg-dark"
+      class="col-shrink bg-dark row justify-end"
       id="bottom-panel"
     >
-      <QToolbarTitle> Rumsnamn: <span class="text-info">{{ soupStore.roomState?.roomName }}</span></QToolbarTitle>
+      <!-- <QToolbarTitle class="debug-red">
+        Robbit: <span class="text-info">{{ soupStore.roomState?.roomName }}</span>
+      </QToolbarTitle> -->
       <QBtn
+        class="col"
         :disable="currentMuteState === 'forceMuted'"
         :icon="muteStateIcons[currentMuteState]"
         :color="(currentMuteState==='unmuted'?'primary':'')"
@@ -124,6 +127,7 @@
         <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
       </QBtn>
       <QBtn
+        class="col"
         :icon="(videoEnabled?'videocam':'videocam_off')"
         :color="(videoEnabled?'primary':'')"
         round
@@ -132,6 +136,7 @@
         <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
       </QBtn>
       <QToggle
+        class="col"
         size="lg"
         label="presentationsläge"
         v-model="screenshareWindowMode"
@@ -143,7 +148,7 @@
         checked-icon="3d_rotation"
         unchecked-icon="fullscreen_exit"
       />
-      <div class="overflow-hidden">
+      <div class="col overflow-hidden">
         <QBtn
           id="raise-hand-button"
           :class="{waving: handRaised}"
@@ -152,68 +157,98 @@
           round
           @click="toggleRaiseHand"
         />
-        <QBtn
-          id="forward-button"
+        <!-- <QBtn
+          id="look-up-button"
           icon="arrow_upward"
           round
-          @mousedown="forwardActive = true"
-          @mouseup="forwardActive = false"
-          @touchstart="forwardActive = true"
-          @touchend="forwardActive = false"
-        />
-        <QBtn
-          id="backward-button"
-          icon="arrow_downward"
-          round
-          @mousedown="reverseActive = true"
-          @mouseup="reverseActive = false"
-          @touchstart="reverseActive = true"
-          @touchend="reverseActive = false"
-        />
-        <QBtn
-          id="left-button"
-          icon="arrow_left"
-          round
-          @mousedown="robotRotation = -1"
-          @mouseup="robotRotation = 0"
-          @touchstart="robotRotation = -1"
-          @touchend="robotRotation = 0"
-        />
-        <QBtn
-          id="right-button"
-          icon="arrow_right"
-          round
-          @mousedown="robotRotation = 1"
-          @mouseup="robotRotation = 0"
-          @touchstart="robotRotation = 1"
-          @touchend="robotRotation = 0"
-        />
-        <QBtn
-          id="look-up-button"
-          icon="arrow_drop_up"
-          round
-          @mousedown="servoAngleChange = 1"
-          @mouseup="servoAngleChange = 0"
-          @touchstart="servoAngleChange = 1"
-          @touchend="servoAngleChange = 0"
+          @mousedown="servoAngleChange.value = 1"
+          @mouseup="servoAngleChange.value = 0"
+          @touchstart="servoAngleChange.value = 1"
+          @touchend="servoAngleChange.value = 0"
         />
         <QBtn
           id="look-down-button"
-          icon="arrow_drop_down"
-          round
-          @mousedown="servoAngleChange = -1"
-          @mouseup="servoAngleChange = 0"
-          @touchstart="servoAngleChange = -1"
-          @touchend="servoAngleChange = 0"
-        />
+          icon="arrow_downward"
+          round00
+          @mousedown="servoAngleChange.value = -1"
+          @mouseup="servoAngleChange.value = 0"
+          @touchstart="servoAngleChange.value = -1"
+          @touchend="servoAngleChange.value = 0"
+        /> -->
       </div>
-      <QBtn
-        label="Enter VR"
-        id="vr-button"
-        color="accent"
-        class="q-mr-none"
-        rounded
-      />
+      <div class="col-shrink row no-wrap">
+        <div class="col-2 column justify-center items-center">
+          <QSlider
+            class="col-grow q-py-md"
+            :min="SERVO_MIN_VALUE"
+            :max="SERVO_MAX_VALUE"
+            v-model="servoAngle"
+            vertical
+            reverse
+          />
+          <QIcon
+            class="col-shrink q-pb-sm"
+            name="visibility"
+            size="sm"
+          />
+        </div>
+        <div class="col-10 column no-wrap">
+          <div class="col row justify-center items-center">
+            <div class="col" />
+            <div class="col flex flex-center">
+              <QBtn
+                id="forward-button"
+                icon="arrow_drop_up"
+                size="lg"
+                round
+                @mousedown="forwardActive = true"
+                @mouseup="forwardActive = false"
+                @touchstart="forwardActive = true"
+                @touchend="forwardActive = false"
+              />
+            </div>
+            <div class="col" />
+          </div>
+          <div class="col row justify-center items-center">
+            <div class="col flex flex-center">
+              <QBtn
+                id="left-button"
+                icon="arrow_left"
+                size="lg"
+                round
+                @mousedown="robotRotation = -1"
+                @mouseup="robotRotation = 0"
+                @touchstart="robotRotation = -1"
+                @touchend="robotRotation = 0"
+              />
+            </div>
+            <div class="col flex flex-center">
+              <QBtn
+                id="backward-button"
+                icon="arrow_drop_down"
+                size="lg"
+                round
+                @mousedown="reverseActive = true"
+                @mouseup="reverseActive = false"
+                @touchstart="reverseActive = true"
+                @touchend="reverseActive = false"
+              />
+            </div>
+            <div class="col flex flex-center">
+              <QBtn
+                id="right-button"
+                icon="arrow_right"
+                size="lg"
+                round
+                @mousedown="robotRotation = 1"
+                @mouseup="robotRotation = 0"
+                @touchstart="robotRotation = 1"
+                @touchend="robotRotation = 0"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </BottomPanel>
   </div>
 </template>
@@ -403,7 +438,7 @@ let forwardActive: boolean;
 let reverseActive: boolean;
 let robotThrottle = 0;
 let robotRotation = 0;
-let servoAngleChange = 0;
+const servoAngleChange = ref(0);
 // let isParked = false;
 // let isWaving = false;
 const SERVO_START_VALUE = 65;
@@ -413,7 +448,7 @@ const ROBOT_MOTOR_MAX_THROTTLE = 1000;
 let DRIVE_MOTOR_SCALE = 0.3;
 let TURN_MOTOR_SCALE = 0.23;
 const SERVO_SCALE = 5;
-let servoAngle = SERVO_START_VALUE;
+const servoAngle = ref(SERVO_START_VALUE);
 
 async function driveRobot () {
   if (!soupStore.roomId) {
@@ -454,11 +489,11 @@ async function driveRobot () {
   const leftMotorFloored = Math.floor(leftMotor);
   const rightMotorFloored = Math.floor(rightMotor);
 
-  servoAngle -= servoAngleChange * SERVO_SCALE;
-  servoAngle = Math.max(
+  servoAngle.value += servoAngleChange.value * SERVO_SCALE;
+  servoAngle.value = Math.max(
     SERVO_MIN_VALUE,
-    Math.min(SERVO_MAX_VALUE, servoAngle));
-  const servoFloored = Math.floor(servoAngle);
+    Math.min(SERVO_MAX_VALUE, servoAngle.value));
+  const servoFloored = Math.floor(servoAngle.value);
   const robotControlMsg = `${leftMotorFloored},${rightMotorFloored},${servoFloored}\n`;
   console.log(`Sending robotcontrol ${robotControlMsg}`);
   await peer.controlRobot(createMessage('robotControl', { msg: robotControlMsg, roomId: soupStore.roomId }));
@@ -485,28 +520,35 @@ function handleKeypress (event: KeyboardEvent) {
   if (event.type === 'keydown') {
     switch (event.key) {
       case 'ArrowUp':
-        servoAngleChange = 1;
+        if (event.shiftKey) {
+          servoAngleChange.value = 1;
+          // console.log(servoAngleChange);
+        } else {
+          forwardActive = true;
+          document.getElementById('forward-button')?.click();
+        }
         break;
       case 'ArrowDown':
-        servoAngleChange = -1;
+        if (event.shiftKey) {
+          servoAngleChange.value = -1;
+        } else {
+          reverseActive = true;
+          document.getElementById('backward-button')?.click();
+        }
         break;
       case 'ArrowLeft':
         robotRotation = -1;
+        document.getElementById('left-button')?.click();
         break;
       case 'ArrowRight':
         robotRotation = 1;
+        document.getElementById('right-button')?.click();
         break;
       case 'a':
       case 'A':
-        // if (!isParked) {
-        forwardActive = true;
-        // }
         break;
       case 'z':
       case 'Z':
-        // if (!isParked) {
-        reverseActive = true;
-        // }
         break;
       case 'i':
       case 'I':
@@ -543,10 +585,8 @@ function handleKeypress (event: KeyboardEvent) {
   } else if (event.type === 'keyup') {
     switch (event.key) {
       case 'a':
-        forwardActive = false;
         break;
       case 'z':
-        reverseActive = false;
         break;
       case 'ArrowLeft':
         robotRotation = 0;
@@ -555,10 +595,12 @@ function handleKeypress (event: KeyboardEvent) {
         robotRotation = 0;
         break;
       case 'ArrowUp':
-        servoAngleChange = 0;
+        servoAngleChange.value = 0;
+        forwardActive = false;
         break;
       case 'ArrowDown':
-        servoAngleChange = 0;
+        servoAngleChange.value = 0;
+        reverseActive = false;
         break;
       // case 'Escape':
       //   console.log('Escape was pressed!!!!');
@@ -613,7 +655,7 @@ onMounted(() => {
   }
   robotThrottle = 0;
   robotRotation = 0;
-  servoAngleChange = 0;
+  servoAngleChange.value = 0;
   robotControlIntervalId = setInterval(driveRobot, 300);
   window.addEventListener('keyup', handleKeypress);
   window.addEventListener('keydown', handleKeypress);
