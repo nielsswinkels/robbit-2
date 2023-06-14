@@ -204,6 +204,24 @@
         <div class="col-2 column justify-center items-center">
           <QSlider
             class="col-grow q-py-md"
+            :min="1"
+            :max="3"
+            v-model="speedMode"
+            @change="changeSpeed"
+            vertical
+            reverse
+            snap
+            markers
+          />
+          <QIcon
+            class="col-shrink q-pb-sm"
+            name="speed"
+            size="sm"
+          />
+        </div>
+        <div class="col-2 column justify-center items-center">
+          <QSlider
+            class="col-grow q-py-md"
             :min="SERVO_MIN_VALUE"
             :max="SERVO_MAX_VALUE"
             v-model="servoAngle"
@@ -480,6 +498,7 @@ function sendChat () {
 let forwardActive: boolean;
 let reverseActive: boolean;
 let robotThrottle = 0;
+const speedMode = ref(1);
 let robotRotation = 0;
 const servoAngleChange = ref(0);
 // let isParked = false;
@@ -542,15 +561,30 @@ async function driveRobot () {
   await peer.controlRobot(createMessage('robotControl', { msg: robotControlMsg, roomId: soupStore.roomId }));
 }
 
-function toggleSpeed () {
-  if (DRIVE_MOTOR_SCALE === 1) {
-    DRIVE_MOTOR_SCALE = 0.3;
-    TURN_MOTOR_SCALE = 0.23;
-  } else {
-    DRIVE_MOTOR_SCALE = 1;
-    TURN_MOTOR_SCALE = 0.3;
+function changeSpeed () {
+  switch (speedMode.value) {
+    case 1:
+      DRIVE_MOTOR_SCALE = 0.3;
+      TURN_MOTOR_SCALE = 0.23;
+      break;
+    case 2:
+      DRIVE_MOTOR_SCALE = 0.6;
+      TURN_MOTOR_SCALE = 0.26;
+      break;
+    case 3:
+      DRIVE_MOTOR_SCALE = 1;
+      TURN_MOTOR_SCALE = 0.3;
+      break;
   }
-  console.log('Set DRIVE_MOTOR_SCALE to ' + DRIVE_MOTOR_SCALE);
+  // if (DRIVE_MOTOR_SCALE === 1) {
+  //   DRIVE_MOTOR_SCALE = 0.3;
+  //   TURN_MOTOR_SCALE = 0.23;
+  // } else {
+  //   DRIVE_MOTOR_SCALE = 1;
+  //   TURN_MOTOR_SCALE = 0.3;
+  // }
+  // console.log('Set DRIVE_MOTOR_SCALE to ' + DRIVE_MOTOR_SCALE);
+  console.log('Changed speed to mode ' + speedMode.value);
 }
 
 function handleKeypress (event: KeyboardEvent) {
@@ -640,7 +674,8 @@ function handleKeypress (event: KeyboardEvent) {
       case 'p':
       case 'P':
         if (!chatHasFocus.value) {
-          toggleSpeed();
+          speedMode.value = (speedMode.value + 3) % 3 + 1;
+          changeSpeed();
         }
         break;
       case 'o':
