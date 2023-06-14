@@ -54,7 +54,6 @@ const routes: RouteRecordRaw[] = [
           sendToRoomOverview: true,
         },
       },
-      { path: '/room/:roomId', component: () => import('pages/ClientPage.vue') },
       { name: 'themeTest', path: '/theme', component: () => import('pages/ThemeTest.vue') },
     ],
   },
@@ -62,6 +61,7 @@ const routes: RouteRecordRaw[] = [
     path: '',
     component: () => import('layouts/EmptyLayout.vue'),
     children: [
+      { path: '/room/:roomId', component: () => import('pages/ClientPage.vue') },
       { name: 'robot', path: '/teacher/robot', component: () => import('pages/RobotPage.vue'), meta: { lowestAccessLevel: 'host' } },
       { path: '/admin', component: () => import('pages/AdminPage.vue'), meta: { lowestAccessLevel: 'admin' } },
     ],
