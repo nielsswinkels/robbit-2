@@ -109,231 +109,227 @@
     </QPageContainer>
     <QFooter
       bordered
-      class="bg-grey-8 text-white"
+      class="bg-grey-8 text-white row justify-end items-center q-col-gutter-md q-px-sm q-pb-sm wrap"
     >
-      <QToolbar
-        class="row justify-end items-center q-gutter-md"
-      >
-        <div class="col-shrink column justify-between items-center">
-          <QBtn
-            round
-            icon="call_end"
-            color="negative"
-            @click="router.replace({name: 'lobby'})"
-          >
-            <QTooltip>Avsluta</QTooltip>
-          </QBtn>
-          <div class="col text-caption">
-            Avsluta
-          </div>
-        </div>
-        <div class="col-shrink column justify-between items-center">
-          <QBtn
-            round
-            icon="settings"
-            :outline="!leftDrawerOpen"
-            :color="(leftDrawerOpen?'primary':'')"
-            @click="toggleLeftDrawer"
-          >
-            <QTooltip>Ändra inställningar</QTooltip>
-          </QBtn>
-          <div class="col text-caption">
-            Inställningar
-          </div>
-        </div>
-        <div class="col-shrink column justify-between items-center">
-          <QBtn
-            size="md"
-            class="row no-wrap"
-            icon-right="people"
-            rounded
-            :outline="!rightDrawerOpen"
-            :color="(rightDrawerOpen?'primary':'')"
-            @click="toggleRightDrawer"
-            :label="(soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0')+' '"
-          >
-            <QTooltip>Se alla som är inne i denna Robbit</QTooltip>
-          </QBtn>
-          <div class="col text-caption">
-            Deltagare
-          </div>
-        </div>
-        <div class="col-grow" />
-        <QForm
-          @submit="sendChat"
-          class="col-shrink"
+      <div class="col-shrink column justify-between items-center">
+        <QBtn
+          round
+          icon="call_end"
+          color="negative"
+          @click="router.replace({name: 'lobby'})"
         >
-          <QInput
-            v-model="chatInput"
-            outlined
-            ref="chatInputField"
-            @focus="chatHasFocus = true"
-            @blur="chatHasFocus = false"
-          >
-            <template #append>
+          <QTooltip>Avsluta</QTooltip>
+        </QBtn>
+        <div class="col text-caption">
+          Avsluta
+        </div>
+      </div>
+      <div class="col-shrink column justify-between items-center">
+        <QBtn
+          round
+          icon="settings"
+          :outline="!leftDrawerOpen"
+          :color="(leftDrawerOpen?'primary':'')"
+          @click="toggleLeftDrawer"
+        >
+          <QTooltip>Ändra inställningar</QTooltip>
+        </QBtn>
+        <div class="col text-caption">
+          Inställningar
+        </div>
+      </div>
+      <div class="col-shrink column justify-between items-center wrap">
+        <QBtn
+          size="md"
+          class="row no-wrap"
+          icon-right="people"
+          rounded
+          :outline="!rightDrawerOpen"
+          :color="(rightDrawerOpen?'primary':'')"
+          @click="toggleRightDrawer"
+          :label="(soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0')+' '"
+        >
+          <QTooltip>Se alla som är inne i denna Robbit</QTooltip>
+        </QBtn>
+        <div class="col text-caption">
+          Deltagare
+        </div>
+      </div>
+      <div class="col-grow" />
+      <QForm
+        @submit="sendChat"
+        class="col-xs-12 col-sm-12 col-md-grow col-lg-grow chat-input-form"
+      >
+        <QInput
+          v-model="chatInput"
+          outlined
+          ref="chatInputField"
+          @focus="chatHasFocus = true"
+          @blur="chatHasFocus = false"
+        >
+          <template #append>
+            <QBtn
+              icon="send"
+              color="primary"
+              flat
+              dense
+              round
+              @click="sendChat"
+            />
+          </template>
+        </QInput>
+      </QForm>
+      <div class="col-shrink column justify-between items-center">
+        <QBtn
+          :disable="currentMuteState === 'forceMuted'"
+          :icon="muteStateIcons[currentMuteState]"
+          :color="(currentMuteState==='unmuted'?'primary':'')"
+          :outline="currentMuteState!=='unmuted'"
+          round
+          @click="toggleMute"
+        >
+          <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
+        </QBtn>
+        <div class="col text-caption">
+          Mikrofon
+        </div>
+      </div>
+      <div class="col-shrink column items-center">
+        <!-- :color="(videoEnabled?'primary':'#a58440')" -->
+        <QBtn
+          :icon="(videoEnabled?'videocam':'videocam_off')"
+          :color="(videoEnabled?'primary':'')"
+          :outline="!videoEnabled"
+          round
+          @click="toggleVideo"
+        >
+          <QTooltip>Stäng av eller sätt på video</QTooltip>
+        </QBtn>
+        <div class="col text-caption">
+          Kamera
+        </div>
+      </div>
+      <div class="col-shrink column items-center">
+        <QBtn
+          id="raise-hand-button"
+          icon="waving_hand"
+          :class="{waving: handRaised}"
+          :color="(handRaised? 'primary': '')"
+          :outline="!handRaised"
+          round
+          @click="toggleRaiseHand"
+        >
+          <!-- <QIcon
+            name="waving_hand"
+            size="sm"
+          /> -->
+          <QTooltip>Räck upp handen</QTooltip>
+        </QBtn>
+        <div class="col text-caption">
+          Vinka
+        </div>
+      </div>
+      <!-- <div class="col-shrink row justify-evenly q-gutter-md no-wrap">
+      </div> -->
+      <div class="col-shrink row no-wrap">
+        <div class="col-2 column justify-center items-center">
+          <QSlider
+            class="col-grow q-py-sm"
+            :min="1"
+            :max="3"
+            v-model="speedMode"
+            @change="changeSpeed"
+            vertical
+            reverse
+            snap
+            markers
+          />
+          <QIcon
+            class="col-1 q-py-sm"
+            name="speed"
+            size="sm"
+          />
+        </div>
+        <div class="col-2 column justify-center items-center">
+          <QSlider
+            class="col-grow q-py-sm"
+            :min="SERVO_MIN_VALUE"
+            :max="SERVO_MAX_VALUE"
+            v-model="servoAngle"
+            vertical
+            reverse
+          />
+          <QIcon
+            class="col-1 q-py-sm"
+            name="visibility"
+            size="sm"
+          />
+        </div>
+        <div class="col-8 column no-wrap">
+          <div class="col row justify-center items-center">
+            <div class="col" />
+            <div class="col flex flex-center">
               <QBtn
-                icon="send"
-                color="primary"
-                flat
-                dense
-                round
-                @click="sendChat"
+                id="forward-button"
+                icon="arrow_drop_up"
+                size="md"
+                class="q-mx-sm"
+                rounded
+                outline
+                @mousedown="forwardActive = true"
+                @mouseup="forwardActive = false"
+                @touchstart="forwardActive = true"
+                @touchend="forwardActive = false"
               />
-            </template>
-          </QInput>
-        </QForm>
-        <div class="col-shrink row justify-evenly q-gutter-md no-wrap">
-          <div class="col column justify-between items-center">
-            <QBtn
-              :disable="currentMuteState === 'forceMuted'"
-              :icon="muteStateIcons[currentMuteState]"
-              :color="(currentMuteState==='unmuted'?'primary':'')"
-              :outline="currentMuteState!=='unmuted'"
-              round
-              @click="toggleMute"
-            >
-              <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
-            </QBtn>
-            <div class="col text-caption">
-              Mikrofon
             </div>
+            <div class="col" />
           </div>
-          <div class="col column items-center">
-            <!-- :color="(videoEnabled?'primary':'#a58440')" -->
-            <QBtn
-              :icon="(videoEnabled?'videocam':'videocam_off')"
-              :color="(videoEnabled?'primary':'')"
-              :outline="!videoEnabled"
-              round
-              @click="toggleVideo"
-            >
-              <QTooltip>Stäng av eller sätt på video</QTooltip>
-            </QBtn>
-            <div class="col text-caption">
-              Kamera
+          <div class="col row justify-center items-center">
+            <div class="col flex flex-center">
+              <QBtn
+                id="left-button"
+                icon="arrow_left"
+                size="md"
+                class="q-mx-sm"
+                rounded
+                outline
+                @mousedown="robotRotation = -1"
+                @mouseup="robotRotation = 0"
+                @touchstart="robotRotation = -1"
+                @touchend="robotRotation = 0"
+              />
             </div>
-          </div>
-          <div class="col column items-center">
-            <QBtn
-              id="raise-hand-button"
-              icon="waving_hand"
-              :class="{waving: handRaised}"
-              :color="(handRaised? 'primary': '')"
-              :outline="!handRaised"
-              round
-              @click="toggleRaiseHand"
-            >
-              <!-- <QIcon
-                name="waving_hand"
-                size="sm"
-              /> -->
-              <QTooltip>Räck upp handen</QTooltip>
-            </QBtn>
-            <div class="col text-caption">
-              Vinka
+            <div class="col flex flex-center">
+              <QBtn
+                id="backward-button"
+                icon="arrow_drop_down"
+                size="md"
+                class="q-mx-sm"
+                rounded
+                outline
+                @mousedown="reverseActive = true"
+                @mouseup="reverseActive = false"
+                @touchstart="reverseActive = true"
+                @touchend="reverseActive = false"
+              />
+            </div>
+            <div class="col flex flex-center">
+              <QBtn
+                id="right-button"
+                icon="arrow_right"
+                size="md"
+                class="q-mx-sm"
+                rounded
+                outline
+                @mousedown="robotRotation = 1"
+                @mouseup="robotRotation = 0"
+                @touchstart="robotRotation = 1"
+                @touchend="robotRotation = 0"
+              />
             </div>
           </div>
         </div>
-        <div class="col-shrink row no-wrap">
-          <div class="col-2 column justify-center items-center">
-            <QSlider
-              class="col-grow q-py-sm"
-              :min="1"
-              :max="3"
-              v-model="speedMode"
-              @change="changeSpeed"
-              vertical
-              reverse
-              snap
-              markers
-            />
-            <QIcon
-              class="col-1 q-py-sm"
-              name="speed"
-              size="sm"
-            />
-          </div>
-          <div class="col-2 column justify-center items-center">
-            <QSlider
-              class="col-grow q-py-sm"
-              :min="SERVO_MIN_VALUE"
-              :max="SERVO_MAX_VALUE"
-              v-model="servoAngle"
-              vertical
-              reverse
-            />
-            <QIcon
-              class="col-1 q-py-sm"
-              name="visibility"
-              size="sm"
-            />
-          </div>
-          <div class="col-8 column no-wrap">
-            <div class="col row justify-center items-center">
-              <div class="col" />
-              <div class="col flex flex-center">
-                <QBtn
-                  id="forward-button"
-                  icon="arrow_drop_up"
-                  size="md"
-                  class="q-mx-sm"
-                  rounded
-                  outline
-                  @mousedown="forwardActive = true"
-                  @mouseup="forwardActive = false"
-                  @touchstart="forwardActive = true"
-                  @touchend="forwardActive = false"
-                />
-              </div>
-              <div class="col" />
-            </div>
-            <div class="col row justify-center items-center">
-              <div class="col flex flex-center">
-                <QBtn
-                  id="left-button"
-                  icon="arrow_left"
-                  size="md"
-                  class="q-mx-sm"
-                  rounded
-                  outline
-                  @mousedown="robotRotation = -1"
-                  @mouseup="robotRotation = 0"
-                  @touchstart="robotRotation = -1"
-                  @touchend="robotRotation = 0"
-                />
-              </div>
-              <div class="col flex flex-center">
-                <QBtn
-                  id="backward-button"
-                  icon="arrow_drop_down"
-                  size="md"
-                  class="q-mx-sm"
-                  rounded
-                  outline
-                  @mousedown="reverseActive = true"
-                  @mouseup="reverseActive = false"
-                  @touchstart="reverseActive = true"
-                  @touchend="reverseActive = false"
-                />
-              </div>
-              <div class="col flex flex-center">
-                <QBtn
-                  id="right-button"
-                  icon="arrow_right"
-                  size="md"
-                  class="q-mx-sm"
-                  rounded
-                  outline
-                  @mousedown="robotRotation = 1"
-                  @mouseup="robotRotation = 0"
-                  @touchstart="robotRotation = 1"
-                  @touchend="robotRotation = 0"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </QToolbar>
+      </div>
     </QFooter>
   </QLayout>
   <!-- <div
@@ -1108,4 +1104,10 @@ const screenshareWindowMode = ref('vr');
     //   transition: opacity 0.1s linear;
     //   transition: margin-left 0.5s linear;
     // }
+
+    @media(max-width:1024px) {
+      .chat-input-form {
+        order: -1;
+      }
+    }
   </style>
