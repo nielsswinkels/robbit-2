@@ -17,7 +17,7 @@
 
           <QItemSection
             v-if="!editingRoomName"
-            @click="editingRoomName = true"
+            @click="editingRoomName = true; inputRoomName = soupStore.roomState?.roomName"
           >
             {{ (soupStore.roomState?.roomName? soupStore.roomState?.roomName : 'No name!') }}
           </QItemSection>
