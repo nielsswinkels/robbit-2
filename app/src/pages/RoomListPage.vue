@@ -83,7 +83,20 @@ const soupStore = useSoupStore();
 //   console.log('knock response:', response);
 // }
 
+function goFullscreen () {
+  if (!$q.fullscreen.isActive) {
+    $q.fullscreen.request()
+      .then(() => {
+        console.log('Going fullscreen');
+      })
+      .catch(err => {
+        console.log('Can\'t go fullscreen because ' + err);
+      });
+  }
+}
+
 function enterRoom (roomId: string) {
+  goFullscreen();
   if (props.sendToRoomOverview) {
     router.push({ name: 'controlRoom', params: { roomId } });
   } else {
