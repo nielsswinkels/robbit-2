@@ -1,21 +1,76 @@
 <template>
-  <div
-    id="overlay"
-    class="q-gutter-md"
+  <QLayout
+    view="hHh lpR fFf"
   >
-    <QBtn
-      round
-      icon="arrow_back"
-      color="primary"
-      @click="router.replace({name: 'lobby'})"
-    />
-    <QCard
-      tag="div"
-      class="q-pa-md text-weight-bold"
+    <QDrawer
+      v-model="leftDrawerOpen"
+      side="left"
+      behavior="desktop"
+      bordered
     >
-      <QList class="no-pointer-events">
+      <QList>
+        <QItem
+          clickable
+          v-ripple
+          @click="toggleLeftDrawer"
+        >
+          <QItemSection>
+            <QItemLabel header>
+              Inställningar
+            </QItemLabel>
+          </QItemSection>
+          <QItemSection side top>
+            <QIcon
+              name="close"
+            />
+          </QItemSection>
+        </QItem>
+        <QItem
+          clickable
+          v-ripple
+          @click="toggleFullscreen"
+        >
+          <QItemSection avatar>
+            <QIcon
+              color="primary"
+              :name="($q.fullscreen.isActive? 'fullscreen_exit': 'fullscreen')"
+            />
+          </QItemSection>
+
+          <QItemSection>
+            {{ ($q.fullscreen.isActive? 'Avsluta helskärm': 'Helskärm') }}
+          </QItemSection>
+        </QItem>
+      </QList>
+    </QDrawer>
+    <QDrawer
+      v-model="rightDrawerOpen"
+      side="right"
+      behavior="desktop"
+      bordered
+    >
+      <QList>
+        <QItem
+          clickable
+          v-ripple
+          @click="toggleRightDrawer"
+        >
+          <QItemSection>
+            <QItemLabel header>
+              Deltagare
+            </QItemLabel>
+          </QItemSection>
+          <QItemSection side top>
+            <QIcon
+              name="close"
+            />
+          </QItemSection>
+        </QItem>
         <QItemLabel header>
-          I detta rum:
+          Robbit:
+          <span class="text-primary">
+            {{ soupStore.roomState?.roomName }}
+          </span>
         </QItemLabel>
         <QItem
           v-for="client in soupStore.roomState?.clients"
@@ -28,99 +83,87 @@
           </template>
         </QItem>
       </QList>
-    </QCard>
-  </div>
-  <div
-    id="main-container"
-    class="column no-wrap"
-  >
-    <div
-      id="video-container"
-      class="col"
-    >
-      <video
-        v-show="true"
-        id="main-video"
-        autoplay
-        ref="videoTag"
-        class=""
-      />
-      <video
-        v-show="screenshareWindowMode !== 'vr'"
-        id="screen-video"
-        :class="{'fill-screen': screenshareWindowMode === 'big' }"
-        autoplay
-        ref="screenTag"
-      />
-    </div>
-    <!-- <div
-      id="vr-container"
-      class="col-grow bg-pink relative-position"
-    >
-      <a-scene
-        v-show="false"
-        embedded
-        cursor="rayOrigin: mouse; fuse: false;"
-        raycaster="objects: .clickable"
-        vr-mode-ui="enterVRButton: #vr-button;"
-      >
-        <a-mixin
-          id="rayResize"
-          animation__scale="property: scale; to: 1.1 1.1 1.1; dur: 200; startEvents: mouseenter"
-          animation__scale_reverse="property: scale; to: 1 1 1; dur: 200; startEvents: mouseleave"
-        />
-        <a-camera
-          ref="cameraTag"
-          :look-controls-enabled="!videoIsGrabbed"
-          reverse-mouse-drag="true"
-          wasd-controls-enabled="false"
-        />
-        <a-videosphere />
-        <a-entity
-          ref="videoRotaterTag"
-          position="0 1.2 0"
-          rotation="0 0 0"
-          class="rotation-target"
+    </QDrawer>
+    <QPageContainer>
+      <QPage>
+        <div
+          id="video-container"
+          class="col"
         >
-          <a-video
-            :visible="showVRVideoFrame"
-            mixin="rayResize"
-            scale="1 1 0"
-            width="1.7777"
-            :height="screenShareHeight"
-            position="0 0 -1"
-            rotation="0 0 0"
-            id="screenshare-frame"
-            class="rotation-trigger"
-            :class="{raycastable: showVRVideoFrame, clickable: showVRVideoFrame}"
-            @mousedown="videoGrabbed"
-            @mouseup="videoReleased"
+          <video
+            v-show="true"
+            id="main-video"
+            autoplay
+            ref="videoTag"
+            class=""
           />
-        </a-entity>
-        <a-entity
-          class="controller"
-          laser-controls="hand: left"
-          raycaster="objects: .raycastable"
-        />
-        <a-entity
-          rotation-control
-          class="controller"
-          laser-controls="hand: right"
-          raycaster="objects: .raycastable"
-        />
-      </a-scene>
-    </div> -->
-    <BottomPanel
-      class="col-shrink bg-dark row justify-end debug-blue wrap"
-      id="bottom-panel"
+          <!-- <video
+            v-show="screenshareWindowMode !== 'vr'"
+            id="screen-video"
+            :class="{'fill-screen': screenshareWindowMode === 'big' }"
+            autoplay
+            ref="screenTag"
+          /> -->
+        </div>
+      </QPage>
+    </QPageContainer>
+    <QFooter
+      bordered
+      class="bg-grey-8 text-white"
     >
-      <!-- <QToolbarTitle class="debug-red">
-        Robbit: <span class="text-info">{{ soupStore.roomState?.roomName }}</span>
-      </QToolbarTitle> -->
-      <div class="col-shrink row justify-evenly q-gutter-md no-wrap">
-        <QForm @submit="sendChat">
+      <QToolbar
+        class="row justify-end items-center q-gutter-md"
+      >
+        <div class="col-shrink column justify-between items-center">
+          <QBtn
+            round
+            icon="call_end"
+            color="negative"
+            @click="router.replace({name: 'lobby'})"
+          >
+            <QTooltip>Avsluta</QTooltip>
+          </QBtn>
+          <div class="col text-caption">
+            Avsluta
+          </div>
+        </div>
+        <div class="col-shrink column justify-between items-center">
+          <QBtn
+            round
+            icon="settings"
+            :outline="!leftDrawerOpen"
+            :color="(leftDrawerOpen?'primary':'')"
+            @click="toggleLeftDrawer"
+          >
+            <QTooltip>Ändra inställningar</QTooltip>
+          </QBtn>
+          <div class="col text-caption">
+            Inställningar
+          </div>
+        </div>
+        <div class="col-shrink column justify-between items-center">
+          <QBtn
+            size="md"
+            class="row no-wrap"
+            icon-right="people"
+            rounded
+            :outline="!rightDrawerOpen"
+            :color="(rightDrawerOpen?'primary':'')"
+            @click="toggleRightDrawer"
+            :label="(soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0')+' '"
+          >
+            <QTooltip>Se alla som är inne i denna Robbit</QTooltip>
+          </QBtn>
+          <div class="col text-caption">
+            Deltagare
+          </div>
+        </div>
+        <div class="col-grow" />
+        <QForm
+          @submit="sendChat"
+          class="col-shrink"
+        >
           <QInput
-            class="col-grow"
             v-model="chatInput"
             outlined
             ref="chatInputField"
@@ -139,160 +182,209 @@
             </template>
           </QInput>
         </QForm>
-        <div class="col column justify-between items-center">
-          <QBtn
-            :disable="currentMuteState === 'forceMuted'"
-            :icon="muteStateIcons[currentMuteState]"
-            :color="(currentMuteState==='unmuted'?'primary':'')"
-            :outline="currentMuteState!=='unmuted'"
-            round
-            @click="toggleMute"
-          >
-            <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
-          </QBtn>
-          <div class="col text-caption">
-            Mikrofon
+        <div class="col-shrink row justify-evenly q-gutter-md no-wrap">
+          <div class="col column justify-between items-center">
+            <QBtn
+              :disable="currentMuteState === 'forceMuted'"
+              :icon="muteStateIcons[currentMuteState]"
+              :color="(currentMuteState==='unmuted'?'primary':'')"
+              :outline="currentMuteState!=='unmuted'"
+              round
+              @click="toggleMute"
+            >
+              <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
+            </QBtn>
+            <div class="col text-caption">
+              Mikrofon
+            </div>
+          </div>
+          <div class="col column items-center">
+            <!-- :color="(videoEnabled?'primary':'#a58440')" -->
+            <QBtn
+              :icon="(videoEnabled?'videocam':'videocam_off')"
+              :color="(videoEnabled?'primary':'')"
+              :outline="!videoEnabled"
+              round
+              @click="toggleVideo"
+            >
+              <QTooltip>Stäng av eller sätt på video</QTooltip>
+            </QBtn>
+            <div class="col text-caption">
+              Kamera
+            </div>
+          </div>
+          <div class="col column items-center">
+            <QBtn
+              id="raise-hand-button"
+              icon="waving_hand"
+              :class="{waving: handRaised}"
+              :color="(handRaised? 'primary': '')"
+              :outline="!handRaised"
+              round
+              @click="toggleRaiseHand"
+            >
+              <!-- <QIcon
+                name="waving_hand"
+                size="sm"
+              /> -->
+              <QTooltip>Räck upp handen</QTooltip>
+            </QBtn>
+            <div class="col text-caption">
+              Vinka
+            </div>
           </div>
         </div>
-        <div class="col column items-center">
-          <!-- :color="(videoEnabled?'primary':'#a58440')" -->
-          <QBtn
-            :icon="(videoEnabled?'videocam':'videocam_off')"
-            :color="(videoEnabled?'primary':'')"
-            :outline="!videoEnabled"
-            round
-            @click="toggleVideo"
-          >
-            <QTooltip>Stäng av eller sätt på video</QTooltip>
-          </QBtn>
-          <div class="col text-caption">
-            Kamera
-          </div>
-        </div>
-        <!-- <QToggle
-          class="col"
-          size="lg"
-          label="presentationsläge"
-          v-model="screenshareWindowMode"
-          toggle-indeterminate
-          indeterminate-value="big"
-          true-value="vr"
-          false-value="small"
-          indeterminate-icon="fullscreen"
-          checked-icon="3d_rotation"
-          unchecked-icon="fullscreen_exit"
-        /> -->
-        <div class="col overflow-hidden">
-          <QBtn
-            id="raise-hand-button"
-            :class="{waving: handRaised}"
-            :color="(handRaised? 'primary': '')"
-            :outline="!handRaised"
-            round
-            @click="toggleRaiseHand"
-          >
+        <div class="col-shrink row no-wrap">
+          <div class="col-2 column justify-center items-center">
+            <QSlider
+              class="col-grow q-py-sm"
+              :min="1"
+              :max="3"
+              v-model="speedMode"
+              @change="changeSpeed"
+              vertical
+              reverse
+              snap
+              markers
+            />
             <QIcon
-              name="waving_hand"
-              color="yellow"
+              class="col-1 q-py-sm"
+              name="speed"
               size="sm"
             />
-            <QTooltip>Stäng av eller sätt på mikrofonen</QTooltip>
-          </QBtn>
-        </div>
-      </div>
-      <div class="col-shrink row no-wrap">
-        <div class="col-2 column justify-center items-center">
-          <QSlider
-            class="col-grow q-py-md"
-            :min="1"
-            :max="3"
-            v-model="speedMode"
-            @change="changeSpeed"
-            vertical
-            reverse
-            snap
-            markers
-          />
-          <QIcon
-            class="col-shrink q-pb-sm"
-            name="speed"
-            size="sm"
-          />
-        </div>
-        <div class="col-2 column justify-center items-center">
-          <QSlider
-            class="col-grow q-py-md"
-            :min="SERVO_MIN_VALUE"
-            :max="SERVO_MAX_VALUE"
-            v-model="servoAngle"
-            vertical
-            reverse
-          />
-          <QIcon
-            class="col-shrink q-pb-sm"
-            name="visibility"
-            size="sm"
-          />
-        </div>
-        <div class="col-10 column no-wrap">
-          <div class="col row justify-center items-center">
-            <div class="col" />
-            <div class="col flex flex-center">
-              <QBtn
-                id="forward-button"
-                icon="arrow_drop_up"
-                size="lg"
-                round
-                @mousedown="forwardActive = true"
-                @mouseup="forwardActive = false"
-                @touchstart="forwardActive = true"
-                @touchend="forwardActive = false"
-              />
-            </div>
-            <div class="col" />
           </div>
-          <div class="col row justify-center items-center">
-            <div class="col flex flex-center">
-              <QBtn
-                id="left-button"
-                icon="arrow_left"
-                size="lg"
-                round
-                @mousedown="robotRotation = -1"
-                @mouseup="robotRotation = 0"
-                @touchstart="robotRotation = -1"
-                @touchend="robotRotation = 0"
-              />
+          <div class="col-2 column justify-center items-center">
+            <QSlider
+              class="col-grow q-py-sm"
+              :min="SERVO_MIN_VALUE"
+              :max="SERVO_MAX_VALUE"
+              v-model="servoAngle"
+              vertical
+              reverse
+            />
+            <QIcon
+              class="col-1 q-py-sm"
+              name="visibility"
+              size="sm"
+            />
+          </div>
+          <div class="col-8 column no-wrap">
+            <div class="col row justify-center items-center">
+              <div class="col" />
+              <div class="col flex flex-center">
+                <QBtn
+                  id="forward-button"
+                  icon="arrow_drop_up"
+                  size="md"
+                  class="q-mx-sm"
+                  rounded
+                  outline
+                  @mousedown="forwardActive = true"
+                  @mouseup="forwardActive = false"
+                  @touchstart="forwardActive = true"
+                  @touchend="forwardActive = false"
+                />
+              </div>
+              <div class="col" />
             </div>
-            <div class="col flex flex-center">
-              <QBtn
-                id="backward-button"
-                icon="arrow_drop_down"
-                size="lg"
-                round
-                @mousedown="reverseActive = true"
-                @mouseup="reverseActive = false"
-                @touchstart="reverseActive = true"
-                @touchend="reverseActive = false"
-              />
-            </div>
-            <div class="col flex flex-center">
-              <QBtn
-                id="right-button"
-                icon="arrow_right"
-                size="lg"
-                round
-                @mousedown="robotRotation = 1"
-                @mouseup="robotRotation = 0"
-                @touchstart="robotRotation = 1"
-                @touchend="robotRotation = 0"
-              />
+            <div class="col row justify-center items-center">
+              <div class="col flex flex-center">
+                <QBtn
+                  id="left-button"
+                  icon="arrow_left"
+                  size="md"
+                  class="q-mx-sm"
+                  rounded
+                  outline
+                  @mousedown="robotRotation = -1"
+                  @mouseup="robotRotation = 0"
+                  @touchstart="robotRotation = -1"
+                  @touchend="robotRotation = 0"
+                />
+              </div>
+              <div class="col flex flex-center">
+                <QBtn
+                  id="backward-button"
+                  icon="arrow_drop_down"
+                  size="md"
+                  class="q-mx-sm"
+                  rounded
+                  outline
+                  @mousedown="reverseActive = true"
+                  @mouseup="reverseActive = false"
+                  @touchstart="reverseActive = true"
+                  @touchend="reverseActive = false"
+                />
+              </div>
+              <div class="col flex flex-center">
+                <QBtn
+                  id="right-button"
+                  icon="arrow_right"
+                  size="md"
+                  class="q-mx-sm"
+                  rounded
+                  outline
+                  @mousedown="robotRotation = 1"
+                  @mouseup="robotRotation = 0"
+                  @touchstart="robotRotation = 1"
+                  @touchend="robotRotation = 0"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </QToolbar>
+    </QFooter>
+  </QLayout>
+  <!-- <div
+    id="overlay"
+    class="q-gutter-md"
+  >
+    <QBtn
+      round
+      icon="arrow_back"
+      color="primary"
+      @click="router.replace({name: 'lobby'})"
+    />
+    <QCard
+      tag="div"
+      class="q-pa-md text-weight-bold"
+    >
+      <QList class="no-pointer-events">
+        <QItemLabel header>
+          Robbit:
+          <span class="text-primary">
+            {{ soupStore.roomState?.roomName }}
+          </span>
+        </QItemLabel>
+        <QItem
+          v-for="client in soupStore.roomState?.clients"
+          :key="client.clientId"
+        >
+          {{ client.username }}
+          {{ client.customProperties.chatMsg }}
+          <template v-if="client.clientId === soupStore.clientState?.clientId">
+            (du)
+          </template>
+        </QItem>
+      </QList>
+    </QCard>
+  </div> -->
+  <!-- <div
+    id="main-container"
+    class="column no-wrap"
+  >
+    <div
+      id="main-content"
+      class="col row no-wrap"
+    >
+    </div>
+    <BottomPanel
+      class="col-shrink bg-dark row justify-end wrap"
+      id="bottom-panel"
+    >
     </BottomPanel>
-  </div>
+  </div> -->
 </template>
 <script
     setup
@@ -464,6 +556,37 @@ watch(() => soupStore.roomState?.clients, async (newClients, _oldCLients) => {
     }
   }
 }, { immediate: true, deep: true });
+
+const leftDrawerOpen = ref(false);
+const rightDrawerOpen = ref(false);
+
+function toggleLeftDrawer () {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function toggleRightDrawer () {
+  rightDrawerOpen.value = !rightDrawerOpen.value;
+}
+
+function toggleFullscreen () {
+  if ($q.fullscreen.isActive) {
+    $q.fullscreen.exit()
+      .then(() => {
+        console.log('Leaving fullscreen');
+      })
+      .catch(err => {
+        console.log('Can\'t leave fullscreen because ' + err);
+      });
+  } else {
+    $q.fullscreen.request()
+      .then(() => {
+        console.log('Going fullscreen');
+      })
+      .catch(err => {
+        console.log('Can\'t go fullscreen because ' + err);
+      });
+  }
+}
 
 const videoTag = ref<HTMLVideoElement>();
 const screenTag = ref<HTMLVideoElement>();
@@ -890,14 +1013,14 @@ const screenshareWindowMode = ref('vr');
 
   <style lang="scss">
     #main-container {
-    position: absolute;
-    left: 0;
-    right: 0;
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-    user-select: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      user-select: none;
     }
 
     #bottom-panel {
@@ -905,22 +1028,26 @@ const screenshareWindowMode = ref('vr');
     }
 
     #main-video {
-    z-index: 50;
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      min-width: 0;
+      min-height: 0;
+      max-width:100% !important;
+      max-height:100% !important;
+      width: 100% !important;
+      height: 100% !important;
     }
 
     #screen-video {
-    z-index: 10000;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    max-width: 30rem;
-    max-height: 30rem;
-    background-color: aqua;
-    transition: all 300ms;
+      z-index: 10000;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      max-width: 30rem;
+      max-height: 30rem;
+      background-color: aqua;
+      transition: all 300ms;
     }
 
     .fill-screen {
@@ -933,32 +1060,52 @@ const screenshareWindowMode = ref('vr');
     }
 
     #overlay {
-    z-index: 100;
-    position: absolute;
-    // background-color: rgba(100, 100, 150, 0.5);
-    // font-weight: bold;
-    left: 2rem;
-    top: 2rem;
-    // pointer-events: none;
+      z-index: 100;
+      position: absolute;
+      // background-color: rgba(100, 100, 150, 0.5);
+      // font-weight: bold;
+      left: 2rem;
+      top: 2rem;
+      // pointer-events: none;
     }
 
     @keyframes wave {
-    0% {
-    transform: rotate(0deg);
-    }
-    100% {
-    transform: rotate(-90deg);
-    }
+      0% {
+      transform: rotate(0deg);
+      }
+      100% {
+      transform: rotate(-90deg);
+      }
     }
 
     #raise-hand-button {
-    // position: fixed;
-    // z-index: 1000;
-    // top: 2rem;
-    // right: 2rem;
-    overflow: hidden;
-    &.waving {
-    animation: wave 0.5s linear 0s infinite alternate;
+      // position: fixed;
+      // z-index: 1000;
+      // top: 2rem;
+      // right: 2rem;
+      // overflow: hidden;
+      &.waving {
+        animation: wave 0.5s linear 0s infinite alternate;
+      }
     }
-    }
+
+    // .participants-panel {
+    //   background-color: $dark;
+    //   // display:none;
+    // }
+
+    // .slide-in-panel {
+    //   overflow:hidden;
+    // }
+
+    // .slide-in-panel > div {
+    //   margin-left: 100%;
+    //   border: 1px solid red;
+    // }
+
+    // .slide-in {
+    //   margin-left: 0;
+    //   transition: opacity 0.1s linear;
+    //   transition: margin-left 0.5s linear;
+    // }
   </style>
