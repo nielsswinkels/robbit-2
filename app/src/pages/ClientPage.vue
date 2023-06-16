@@ -244,13 +244,13 @@
             ref="videoTag"
             class=""
           />
-          <!-- <video
-            v-show="screenshareWindowMode !== 'vr'"
+          <video
+            v-show="screenshareActive"
             id="screen-video"
             :class="{'fill-screen': screenshareWindowMode === 'big' }"
             autoplay
             ref="screenTag"
-          /> -->
+          />
         </div>
       </QPage>
     </QPageContainer>
@@ -529,6 +529,17 @@ peer.on('notifyCloseEvent', (payload) => {
 peer.on('roomStateUpdated', data => {
   console.log('clientpage roomStateUpdated event triggered!! REASON: ', data.reason);
   console.log(data);
+  let clientWithScreenShare = false;
+  for (const [_clientId, client] of Object.entries(data.newState.clients)) {
+    for (const [_producerId, producer] of Object.entries(client.producers)) {
+      if (producer.producerInfo) {
+        if (producer.producerInfo.screenShare && !producer.producerInfo.paused) {
+          clientWithScreenShare = true;
+        }
+      }
+    }
+  }
+  screenshareActive.value = clientWithScreenShare;
 });
 
 const videoEnabled = ref<boolean>(false);
@@ -618,6 +629,8 @@ async function toggleMute () {
 let consumedScreenProducerId: string;
 const screenShareConsumerId = ref<string>();
 const screenShareHeight = ref<number>(1);
+const screenshareActive = ref<boolean>(false);
+
 watch(() => soupStore.roomState?.clients, async (newClients, _oldCLients) => {
   if (!newClients) return;
   for (const [_clientId, client] of Object.entries(newClients)) {
@@ -632,7 +645,8 @@ watch(() => soupStore.roomState?.clients, async (newClients, _oldCLients) => {
               const fixedWidth = 1.7777;
               screenShareHeight.value = fixedWidth / ratio;
             }
-            console.log('screeeen share!!');
+            console.log('screen share starts!!');
+            screenshareActive.value = true;
             if (!screenTag.value) return;
             const { track, consumerId } = await peer.consume(producer.producerId);
             const trackSettings = track.getSettings();
@@ -660,8 +674,8 @@ watch(() => soupStore.roomState?.clients, async (newClients, _oldCLients) => {
   }
 }, { immediate: true, deep: true });
 
-const leftDrawerOpen = ref(false);
-const rightDrawerOpen = ref(false);
+const leftDrawerOpen = ref<boolean>(false);
+const rightDrawerOpen = ref<boolean>(false);
 
 function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -1140,7 +1154,7 @@ const screenshareWindowMode = ref('vr');
       bottom: 0;
       max-width: 30rem;
       max-height: 30rem;
-      background-color: aqua;
+      background-color: $dark;
       transition: all 300ms;
     }
 
