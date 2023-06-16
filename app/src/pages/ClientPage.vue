@@ -93,6 +93,27 @@
     <QPageContainer>
       <QPage>
         <div
+          class="absolute-top-right"
+          :style="'width: fit-content; max-width: 25%; opacity: ' + selfviewOpacity + '%;'"
+        >
+          <template
+            v-for="client in soupStore.roomState?.clients"
+            :key="client.clientId"
+          >
+            <div
+              v-if="client.customProperties?.chatMsg"
+              class="chat-balloon q-pa-md q-ma-sm column no-wrap justify-end items-end"
+            >
+              <div class="text-bold">
+                {{ client.username }}:
+              </div>
+              <div>
+                {{ client.customProperties?.chatMsg }}
+              </div>
+            </div>
+          </template>
+        </div>
+        <div
           id="video-container"
           class="col"
         >
@@ -383,6 +404,11 @@ peer.on('notifyCloseEvent', (payload) => {
   if (payload.objectType === 'consumer' && payload.objectId === screenShareConsumerId.value) {
     screenShareConsumerId.value = undefined;
   }
+});
+
+peer.on('roomStateUpdated', data => {
+  console.log('clientpage roomStateUpdated event triggered!! REASON: ', data.reason);
+  console.log(data);
 });
 
 const videoEnabled = ref<boolean>(false);
@@ -1052,5 +1078,10 @@ const screenshareWindowMode = ref('vr');
       .chat-input-form {
         order: -1;
       }
+    }
+
+    .chat-balloon {
+      background-color: $secondary;
+      border-radius: 2em 2em 0 2em;
     }
   </style>
