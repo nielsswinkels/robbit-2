@@ -704,7 +704,8 @@ async function chooseRoomName (): Promise<string> {
     noRouteDismiss: false,
     prompt: {
       outlined: true,
-      model: '',
+      // model: '',
+      model: (userStore.userData?.username ? userStore.userData.username : ''),
       isValid: val => !!val,
     },
   });
