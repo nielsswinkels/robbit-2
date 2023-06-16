@@ -19,7 +19,10 @@
               Inställningar
             </QItemLabel>
           </QItemSection>
-          <QItemSection side top>
+          <QItemSection
+            side
+            top
+          >
             <QIcon
               name="close"
             />
@@ -60,7 +63,10 @@
               Deltagare
             </QItemLabel>
           </QItemSection>
-          <QItemSection side top>
+          <QItemSection
+            side
+            top
+          >
             <QIcon
               name="close"
             />
@@ -332,55 +338,6 @@
       </div>
     </QFooter>
   </QLayout>
-  <!-- <div
-    id="overlay"
-    class="q-gutter-md"
-  >
-    <QBtn
-      round
-      icon="arrow_back"
-      color="primary"
-      @click="router.replace({name: 'lobby'})"
-    />
-    <QCard
-      tag="div"
-      class="q-pa-md text-weight-bold"
-    >
-      <QList class="no-pointer-events">
-        <QItemLabel header>
-          Robbit:
-          <span class="text-primary">
-            {{ soupStore.roomState?.roomName }}
-          </span>
-        </QItemLabel>
-        <QItem
-          v-for="client in soupStore.roomState?.clients"
-          :key="client.clientId"
-        >
-          {{ client.username }}
-          {{ client.customProperties.chatMsg }}
-          <template v-if="client.clientId === soupStore.clientState?.clientId">
-            (du)
-          </template>
-        </QItem>
-      </QList>
-    </QCard>
-  </div> -->
-  <!-- <div
-    id="main-container"
-    class="column no-wrap"
-  >
-    <div
-      id="main-content"
-      class="col row no-wrap"
-    >
-    </div>
-    <BottomPanel
-      class="col-shrink bg-dark row justify-end wrap"
-      id="bottom-panel"
-    >
-    </BottomPanel>
-  </div> -->
 </template>
 <script
     setup
@@ -393,7 +350,6 @@ import { useRouter } from 'vue-router';
 // import { THREE, Entity } from 'aframe';
 import { RoomState } from 'shared-types/CustomTypes';
 import { useQuasar } from 'quasar';
-import BottomPanel from 'src/components/BottomPanel.vue';
 import { useUserStore } from 'stores/userStore';
 import { createMessage } from 'shared-types/MessageTypes';
 import Timeout from 'await-timeout';
@@ -710,116 +666,107 @@ function handleKeypress (event: KeyboardEvent) {
   // console.log(event);
   // console.log(event.key + ' ' + event.type);
 
-  if (event.type === 'keydown') {
-    switch (event.key) {
-      case 'ArrowUp':
-        if (!chatHasFocus.value) {
+  if (chatHasFocus.value) {
+    if (event.type === 'keyup') {
+      switch (event.key) {
+        case 'Escape':
+          chatInputField.value?.blur();
+          break;
+      }
+    }
+  } else {
+    if (event.type === 'keydown') {
+      switch (event.key) {
+        case 'ArrowUp':
           if (event.shiftKey) {
             servoAngleChange.value = 1;
-            // console.log(servoAngleChange);
           } else {
             forwardActive = true;
             document.getElementById('forward-button')?.click();
           }
-        }
-        break;
-      case 'ArrowDown':
-        if (!chatHasFocus.value) {
+          break;
+        case 'ArrowDown':
           if (event.shiftKey) {
             servoAngleChange.value = -1;
           } else {
             reverseActive = true;
             document.getElementById('backward-button')?.click();
           }
-        }
-        break;
-      case 'ArrowLeft':
-        if (!chatHasFocus.value) {
+          break;
+        case 'ArrowLeft':
           robotRotation = -1;
           document.getElementById('left-button')?.click();
-        }
-        break;
-      case 'ArrowRight':
-        if (!chatHasFocus.value) {
+          break;
+        case 'ArrowRight':
           robotRotation = 1;
           document.getElementById('right-button')?.click();
-        }
-        break;
-      case 'a':
-      case 'A':
-        break;
-      case 'z':
-      case 'Z':
-        break;
-    }
-  } else if (event.type === 'keyup') {
-    switch (event.key) {
-      case 'a':
-        break;
-      case 'z':
-        break;
-      case 'ArrowLeft':
-        robotRotation = 0;
-        break;
-      case 'ArrowRight':
-        robotRotation = 0;
-        break;
-      case 'ArrowUp':
-        servoAngleChange.value = 0;
-        forwardActive = false;
-        break;
-      case 'ArrowDown':
-        servoAngleChange.value = 0;
-        reverseActive = false;
-        break;
-      case 'k':
-      case 'K':
-        if (!chatHasFocus.value) {
+          break;
+        case 'a':
+        case 'A':
+          break;
+        case 'z':
+        case 'Z':
+          break;
+      }
+    } else if (event.type === 'keyup') {
+      switch (event.key) {
+        case 'a':
+          break;
+        case 'z':
+          break;
+        case 'ArrowLeft':
+          robotRotation = 0;
+          break;
+        case 'ArrowRight':
+          robotRotation = 0;
+          break;
+        case 'ArrowUp':
+          servoAngleChange.value = 0;
+          forwardActive = false;
+          break;
+        case 'ArrowDown':
+          servoAngleChange.value = 0;
+          reverseActive = false;
+          break;
+        case 'k':
+        case 'K':
           toggleVideo();
-        }
-        break;
-      case 'm':
-      case 'M':
-        if (!chatHasFocus.value) {
+          break;
+        case 'm':
+        case 'M':
           toggleMute();
-        }
-        break;
-      case 'r':
-      case 'R':
-        if (!chatHasFocus.value) {
+          break;
+        case 'r':
+        case 'R':
           toggleRaiseHand();
-        }
-        break;
-      case 'p':
-      case 'P':
-        if (!chatHasFocus.value) {
+          break;
+        case 'p':
+        case 'P':
           speedMode.value = (speedMode.value + 3) % 3 + 1;
           changeSpeed();
-        }
-        break;
-      case 'o':
-      case 'O':
-        // changeRobotCamera();
-        break;
-      case 'i':
-      case 'I':
-        // presentSettingsPopover(undefined);
-        break;
-      case 'e':
-      case 'E':
-        // if (!showCamera) {
-        //   presentEmojiPopover(undefined);
-        // }
-        break;
-      case 'c':
-      case 'C':
-        chatInputField.value?.focus();
-        break;
-      case 'Escape':
-        if (chatHasFocus.value) {
-          chatInputField.value?.blur();
-        }
-        break;
+          break;
+        case 'o':
+        case 'O':
+          // changeRobotCamera();
+          break;
+        case 'i':
+        case 'I':
+          // presentSettingsPopover(undefined);
+          break;
+        case 'e':
+        case 'E':
+          // if (!showCamera) {
+          //   presentEmojiPopover(undefined);
+          // }
+          break;
+        case 'c':
+        case 'C':
+          chatInputField.value?.focus();
+          break;
+        case 'Escape':
+          router.replace({ name: 'lobby' });
+          break;
+      }
     }
   }
 }
@@ -1017,10 +964,6 @@ const screenshareWindowMode = ref('vr');
       max-width: 100vw;
       max-height: 100vh;
       user-select: none;
-    }
-
-    #bottom-panel {
-      z-index: 2000;
     }
 
     #main-video {
