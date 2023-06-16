@@ -251,7 +251,9 @@
           <QBtn
             size="md"
             icon="menu"
-            color="primary"
+            :color="(leftDrawerOpen? 'primary': '')"
+            :outline="!leftDrawerOpen"
+            round
             @click="toggleLeftDrawer"
           />
         </QPageSticky>
@@ -263,7 +265,9 @@
           <QBtn
             size="md"
             icon-right="people"
-            color="primary"
+            :color="(rightDrawerOpen? 'primary': '')"
+            :outline="!rightDrawerOpen"
+            rounded
             @click="toggleRightDrawer"
             :label="(soupStore.roomState && soupStore.roomState.clients? Object.keys(soupStore.roomState.clients).length :'0')+' '"
           />
