@@ -24,14 +24,22 @@
         <div
           class="absolute-bottom-right q-ma-xs"
         >
-          {{ client.username }}
-          <QIcon
-            name="videocam_off"
-            v-if="!client.videoEnabled"
-          />
-          <QIcon
-            :name="client.muteIcon"
-          />
+          <div
+            class="chat-balloon q-pa-md q-mr-xl"
+            v-if="client.customProperties.chatMsg"
+          >
+            {{ client.customProperties.chatMsg }}
+          </div>
+          <div class="row justify-end no-wrap">
+            {{ client.username }}
+            <QIcon
+              name="videocam_off"
+              v-if="!client.videoEnabled"
+            />
+            <QIcon
+              :name="client.muteIcon"
+            />
+          </div>
         </div>
         <template
           v-for="(producer, key) in client.producers"
@@ -244,6 +252,11 @@ async function toggleConsume (client: (typeof clientsWithMuteState.value)[number
   z-index: -1;
   background-color: $dark;
   border: 2px solid $primary;
+}
+
+.chat-balloon {
+  background-color: $secondary;
+  border-radius: 2em 2em 0 2em;
 }
 
 .client-video {
