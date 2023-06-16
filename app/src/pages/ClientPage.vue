@@ -44,6 +44,114 @@
             {{ ($q.fullscreen.isActive? 'Avsluta helskärm': 'Helskärm') }}
           </QItemSection>
         </QItem>
+        <QSeparator />
+        <QExpansionItem>
+          <template #header>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="chat"
+              />
+            </QItemSection>
+            <QItemSection>
+              Bild & Ljud
+            </QItemSection>
+          </template>
+          <QItem
+            clickable
+            v-ripple
+            @click="showSelfView =! showSelfView"
+          >
+            <QItemSection avatar>
+              <QToggle
+                v-model="showSelfView"
+                color="primary"
+                :label="(showSelfView? 'Visas för mig' : 'Gömmd för mig')"
+              />
+            </QItemSection>
+          </QItem>
+          <QItem>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="lens_blur"
+              />
+            </QItemSection>
+            <QItemSection avatar>
+              {{ selfviewOpacity }}%
+            </QItemSection>
+            <QItemSection>
+              <QSlider
+                v-model="selfviewOpacity"
+                :min="0"
+                :max="100"
+              />
+            </QItemSection>
+          </QItem>
+          <QItem>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="open_in_full"
+              />
+            </QItemSection>
+            <QItemSection avatar>
+              {{ selfviewSize }}%
+            </QItemSection>
+            <QItemSection>
+              <QSlider
+                v-model="selfviewSize"
+                :min="5"
+                :max="50"
+              />
+            </QItemSection>
+          </QItem>
+        </QExpansionItem>
+        <QSeparator />
+        <QExpansionItem>
+          <template #header>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="chat"
+              />
+            </QItemSection>
+            <QItemSection>
+              Chat
+            </QItemSection>
+          </template>
+          <QItem
+            clickable
+            v-ripple
+            @click="showChat =! showChat"
+          >
+            <QItemSection avatar>
+              <QToggle
+                v-model="showChat"
+                color="primary"
+                :label="(showChat? 'Visas' : 'Gömmd')"
+              />
+            </QItemSection>
+          </QItem>
+          <QItem>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="lens_blur"
+              />
+            </QItemSection>
+            <QItemSection avatar>
+              {{ chatOpacity }}%
+            </QItemSection>
+            <QItemSection>
+              <QSlider
+                v-model="chatOpacity"
+                :min="0"
+                :max="100"
+              />
+            </QItemSection>
+          </QItem>
+        </QExpansionItem>
       </QList>
     </QDrawer>
     <QDrawer
@@ -93,8 +201,20 @@
     <QPageContainer>
       <QPage>
         <div
+          class="absolute-top-left"
+          :style="'width: fit-content; max-width: ' + selfviewSize + '%; opacity: ' + selfviewOpacity + '%;'"
+          v-show="videoEnabled && showSelfView"
+        >
+          <video
+            ref="selfVideoTag"
+            id="self-video-tag"
+            autoplay
+          />
+        </div>
+        <div
           class="absolute-top-right"
-          :style="'width: fit-content; max-width: 25%; opacity: ' + selfviewOpacity + '%;'"
+          :style="'width: fit-content; max-width: 25%; opacity: ' + chatOpacity + '%;'"
+          v-if="showChat"
         >
           <template
             v-for="client in soupStore.roomState?.clients"
@@ -422,6 +542,11 @@ async function toggleVideo () {
         video: true,
       });
       videoProducerId = await peer.produce(videoStream.getVideoTracks()[0]);
+      if (selfVideoTag.value) {
+        selfVideoTag.value.srcObject = videoStream;
+      } else {
+        console.log('template ref not available for selfVideoTag');
+      }
     } else {
       peer.resumeProducer(videoProducerId);
     }
@@ -568,6 +693,10 @@ function toggleFullscreen () {
 
 const videoTag = ref<HTMLVideoElement>();
 const screenTag = ref<HTMLVideoElement>();
+const selfVideoTag = ref<HTMLVideoElement>();
+const selfviewOpacity = ref<number>(50);
+const selfviewSize = ref<number>(25);
+const showSelfView = ref<boolean>(true);
 
 const handRaised = ref<boolean>(false);
 async function toggleRaiseHand () {
@@ -580,9 +709,10 @@ async function toggleRaiseHand () {
 const chatInput = ref('');
 const clearChatTimeout = ref<number>();
 const clearChatTimeoutDuration = 10000;
-
-const chatHasFocus = ref(false);
+const chatHasFocus = ref<boolean>(false);
 const chatInputField = ref<HTMLInputElement>();
+const chatOpacity = ref<number>(50);
+const showChat = ref<boolean>(true);
 
 function sendChat () {
   peer.setCustomClientProperties({
@@ -1082,5 +1212,11 @@ const screenshareWindowMode = ref('vr');
     .chat-balloon {
       background-color: $secondary;
       border-radius: 2em 2em 0 2em;
+    }
+
+    #self-video-tag {
+      max-width: 100%;
+      background-color: $dark;
+      border-bottom-right-radius: 2em;
     }
   </style>
