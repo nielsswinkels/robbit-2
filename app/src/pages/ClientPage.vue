@@ -981,15 +981,14 @@ const screenshareWindowMode = ref('vr');
 </script>
 
   <style lang="scss">
-    #main-container {
+    #video-container {
       position: absolute;
       left: 0;
       right: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       max-width: 100vw;
       max-height: 100vh;
-      user-select: none;
     }
 
     #main-video {
