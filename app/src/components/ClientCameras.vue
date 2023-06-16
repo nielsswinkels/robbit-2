@@ -128,7 +128,6 @@ const clientsWithMuteState = computed(() => {
 });
 
 const clientsPerRow = computed(() => {
-  console.log('clientsColClass' + Object.keys(props.clients).length);
   if (Object.keys(props.clients).length <= 1) {
     return 1;
   } else if (Object.keys(props.clients).length <= 4) {
@@ -141,23 +140,6 @@ const clientsPerRow = computed(() => {
     return 3;
   } else {
     return 4;
-  }
-});
-
-const clientsColClass = computed(() => {
-  console.log('clientsColClass' + Object.keys(props.clients).length);
-  if (Object.keys(props.clients).length <= 1) {
-    return 'col';
-  } else if (Object.keys(props.clients).length <= 4) {
-    return 'col-6';
-  } else if (Object.keys(props.clients).length <= 6) {
-    return 'col-4';
-  } else if (Object.keys(props.clients).length <= 8) {
-    return 'col-3';
-  } else if (Object.keys(props.clients).length <= 9) {
-    return 'col-4';
-  } else {
-    return 'col-3';
   }
 });
 
