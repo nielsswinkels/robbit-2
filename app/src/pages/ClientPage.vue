@@ -66,7 +66,7 @@
               <QToggle
                 v-model="showSelfView"
                 color="primary"
-                :label="(showSelfView? 'Visas för mig' : 'Gömmd för mig')"
+                :label="(showSelfView? 'Visas för mig' : 'Gömd för mig')"
               />
             </QItemSection>
           </QItem>
@@ -201,17 +201,6 @@
     <QPageContainer>
       <QPage>
         <div
-          class="absolute-top-left"
-          :style="'width: fit-content; max-width: ' + selfviewSize + '%; opacity: ' + selfviewOpacity + '%;'"
-          v-show="videoEnabled && showSelfView"
-        >
-          <video
-            ref="selfVideoTag"
-            id="self-video-tag"
-            autoplay
-          />
-        </div>
-        <div
           class="absolute-top-right"
           :style="'width: fit-content; max-width: 25%; opacity: ' + chatOpacity + '%;'"
           v-if="showChat"
@@ -250,6 +239,17 @@
             :class="{'fill-screen': screenshareWindowMode === 'big' }"
             autoplay
             ref="screenTag"
+          />
+        </div>
+        <div
+          class="absolute-top-left"
+          :style="'width: fit-content; max-width: ' + selfviewSize + '%; opacity: ' + selfviewOpacity + '%;'"
+          v-show="videoEnabled && showSelfView"
+        >
+          <video
+            ref="selfVideoTag"
+            id="self-video-tag"
+            autoplay
           />
         </div>
       </QPage>
