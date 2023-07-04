@@ -87,58 +87,122 @@
 
           <QItemSection>{{ (bleConnected?'Bluetooth ansluten':'Bluetooth frånkopplad') }}</QItemSection>
         </QItem>
-        <QItem>
-          <QItemSection avatar>
-            <QIcon
-              color="primary"
-              name="videocam"
-            />
-          </QItemSection>
-
-          <QItemSection>
-            <!-- label="Välj din kamera från nedanstående lista av anslutna video-enheter"
-            tooltip="Om du inte väljer en videokälla kommer mottagarna inte se något" -->
-            <DevicePicker
-              style="min-width: 15rem;"
-              media-type="videoinput"
-              @deviceselected="onVideoPicked"
-            />
-            <div
-              class="row justify-evenly"
-            >
-              <QBtn
-                icon="video_camera_front"
-                @click="getMobileVideo(true)"
+        <QSeparator />
+        <QExpansionItem>
+          <template #header>
+            <QItemSection avatar>
+              <QIcon
                 color="primary"
-                round
+                name="chat"
               />
-              <QBtn
-                icon="video_camera_back"
-                @click="getMobileVideo(false)"
+            </QItemSection>
+            <QItemSection>
+              Bild & Ljud
+            </QItemSection>
+          </template>
+          <QItem>
+            <QItemSection avatar>
+              <QIcon
                 color="primary"
-                round
+                name="videocam"
               />
-            </div>
-          </QItemSection>
-        </QItem>
-        <QItem>
-          <QItemSection avatar>
-            <QIcon
-              color="primary"
-              name="mic"
-            />
-          </QItemSection>
+            </QItemSection>
 
-          <QItemSection>
-            <!-- label="Välj din ljudkälla"
-            tooltip="Om du inte väljer en ljudkälla kommer mottagarna inte höra dig" -->
-            <DevicePicker
-              style="min-width: 15rem;"
-              media-type="audioinput"
-              @deviceselected="onAudioPicked"
-            />
-          </QItemSection>
-        </QItem>
+            <QItemSection>
+              <!-- label="Välj din kamera från nedanstående lista av anslutna video-enheter"
+              tooltip="Om du inte väljer en videokälla kommer mottagarna inte se något" -->
+              <DevicePicker
+                style="min-width: 15rem;"
+                media-type="videoinput"
+                @deviceselected="onVideoPicked"
+              />
+              <div
+                class="row justify-evenly"
+              >
+                <QBtn
+                  icon="video_camera_front"
+                  @click="getMobileVideo(true)"
+                  color="primary"
+                  round
+                />
+                <QBtn
+                  icon="video_camera_back"
+                  @click="getMobileVideo(false)"
+                  color="primary"
+                  round
+                />
+              </div>
+            </QItemSection>
+          </QItem>
+          <QItem>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="mic"
+              />
+            </QItemSection>
+
+            <QItemSection>
+              <!-- label="Välj din ljudkälla"
+              tooltip="Om du inte väljer en ljudkälla kommer mottagarna inte höra dig" -->
+              <DevicePicker
+                style="min-width: 15rem;"
+                media-type="audioinput"
+                @deviceselected="onAudioPicked"
+              />
+            </QItemSection>
+          </QItem>
+          <QItem
+            clickable
+            v-ripple
+            @click="showSelfView =! showSelfView"
+          >
+            <QItemSection avatar>
+              <QToggle
+                v-model="showSelfView"
+                color="primary"
+                :label="(showSelfView? 'Visas för mig' : 'Gömd för mig')"
+              />
+            </QItemSection>
+          </QItem>
+          <QItem>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="lens_blur"
+              />
+            </QItemSection>
+            <QItemSection avatar>
+              {{ selfviewOpacity }}%
+            </QItemSection>
+            <QItemSection>
+              <QSlider
+                v-model="selfviewOpacity"
+                :min="0"
+                :max="100"
+              />
+            </QItemSection>
+          </QItem>
+          <QItem>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="open_in_full"
+              />
+            </QItemSection>
+            <QItemSection avatar>
+              {{ selfviewSize }}%
+            </QItemSection>
+            <QItemSection>
+              <QSlider
+                v-model="selfviewSize"
+                :min="5"
+                :max="50"
+              />
+            </QItemSection>
+          </QItem>
+        </QExpansionItem>
+        <QSeparator />
         <QItem
           clickable
           v-ripple
@@ -153,24 +217,6 @@
 
           <QItemSection>
             {{ ($q.fullscreen.isActive? 'Avsluta helskärm': 'Helskärm') }}
-          </QItemSection>
-        </QItem>
-        <QItem>
-          <QItemSection avatar>
-            <QIcon
-              color="primary"
-              name="lens_blur"
-            />
-          </QItemSection>
-          <QItemSection avatar>
-            {{ selfviewOpacity }}%
-          </QItemSection>
-          <QItemSection>
-            <QSlider
-              v-model="selfviewOpacity"
-              :min="0"
-              :max="100"
-            />
           </QItemSection>
         </QItem>
         <QItem
@@ -211,7 +257,8 @@
       >
         <div
           class="absolute-top-right"
-          :style="'width: fit-content; max-width: 25%; opacity: ' + selfviewOpacity + '%;'"
+          :style="'width: fit-content; max-width: ' + selfviewSize + '%; opacity: ' + selfviewOpacity + '%;'"
+          v-show="showSelfView"
         >
           <video
             ref="videoTag"
@@ -417,6 +464,9 @@ const peer = usePeerClient();
 const soupStore = useSoupStore();
 
 const videoTag = ref<HTMLVideoElement>();
+const selfviewOpacity = ref<number>(50);
+const selfviewSize = ref<number>(25);
+const showSelfView = ref<boolean>(true);
 
 const pickedVideoDevice = ref<MediaDeviceInfo>();
 interface VideoInfo {
@@ -435,8 +485,6 @@ const rightDrawerOpen = ref(false);
 const hideUI = ref(false);
 const hideUITimeout = ref<number>();
 const hideUITimeoutDuration = 7000;
-
-const selfviewOpacity = ref<number>(50);
 
 const roomIsOpen = ref<boolean>(false);
 
