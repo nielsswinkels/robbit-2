@@ -133,13 +133,13 @@ export default class Room {
     if (this.mainProducers.audio || this.mainProducers.video) {
       roomLog('HAS MAINPRODUCER!!!!');
       if (this.mainProducers.video) {
-        if (client.producers.has(this.mainProducers.video.id) || (robot && robot.producers.has(this.mainProducers.video.id))) {
+        if (client.producers.has(this.mainProducers.video.id)) {
           roomLog('removed client/robot was also video mainProducer. Will remove it as well from the room');
           this.mainProducers.video = undefined;
         }
       }
       if (this.mainProducers.audio) {
-        if (client.producers.has(this.mainProducers.audio.id) || (robot && robot.producers.has(this.mainProducers.audio.id))) {
+        if (client.producers.has(this.mainProducers.audio.id)) {
           roomLog('removed client/robot was also audio mainProducer. Will remove it as well from the room');
           this.mainProducers.audio = undefined;
         }
