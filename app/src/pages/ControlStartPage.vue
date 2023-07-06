@@ -6,22 +6,25 @@
     <QBtn
       color="primary"
       outline
+      rounded
       label="Robbit"
       @click="startRobbit"
       icon="smart_toy"
       icon-right="navigate_next"
     />
-    <QBtn
+    <!-- <QBtn
       color="primary"
       outline
+      rounded
       label="Kamerastation"
       :to="{name:'camera'}"
       icon="linked_camera"
       icon-right="navigate_next"
-    />
+    /> -->
     <QBtn
       color="primary"
       outline
+      rounded
       label="Rumskontroll"
       :to="{name: 'controlLobby'}"
       icon="room_preferences"
@@ -30,12 +33,21 @@
     <QBtn
       color="primary"
       outline
+      rounded
       :label="manageBtnLabel"
       :to="{ name: 'userManager'}"
       icon="manage_accounts"
       icon-right="navigate_next"
     />
   </div>
+  <QBtn
+    class="absolute-bottom-left q-ma-sm"
+    color="primary"
+    outline
+    rounded
+    @click="toggleFullscreen"
+    :icon="($q.fullscreen.isActive? 'fullscreen_exit' : 'fullscreen' )"
+  />
   <QSpinner
     v-if="showSpinner"
     size="xl"
@@ -57,7 +69,7 @@ const showSpinner = ref(false);
 const manageBtnLabel = computed(() => {
   const isAdmin = userStore.userData?.role === 'admin';
   if (isAdmin) { return 'Hantera konton'; }
-  return 'Hantera elevkonton';
+  return 'Hantera gästkonton';
 });
 
 function startRobbit () {
@@ -68,6 +80,14 @@ function startRobbit () {
   router.replace({ name: 'robot' });
 }
 
+function toggleFullscreen () {
+  if (!$q.fullscreen.isActive) {
+    goFullscreen();
+  } else {
+    exitFullscreen();
+  }
+}
+
 function goFullscreen () {
   if (!$q.fullscreen.isActive) {
     $q.fullscreen.request()
@@ -76,6 +96,17 @@ function goFullscreen () {
       })
       .catch(err => {
         console.log('Can\'t go fullscreen because ' + err);
+      });
+  }
+}
+function exitFullscreen () {
+  if ($q.fullscreen.isActive) {
+    $q.fullscreen.exit()
+      .then(() => {
+        console.log('Leaving fullscreen');
+      })
+      .catch(err => {
+        console.log('Can\'t leave fullscreen because ' + err);
       });
   }
 }
