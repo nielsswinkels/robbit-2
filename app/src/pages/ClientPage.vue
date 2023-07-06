@@ -947,6 +947,9 @@ async function consumeVideo (producerId: string) {
   if (!videoTag.value) return;
   const { track } = await peer.consume(producerId);
   // videoTag.value.srcObject = new MediaStream([track]);
+  receiveStream.getVideoTracks().forEach((track) => {
+    receiveStream.removeTrack(track);
+  });
   receiveStream.addTrack(track);
   attachSrcObject();
   await nextTick();
@@ -955,6 +958,9 @@ async function consumeVideo (producerId: string) {
 
 async function consumeAudio (producerId: string) {
   const { track } = await peer.consume(producerId);
+  receiveStream.getAudioTracks().forEach((track) => {
+    receiveStream.removeTrack(track);
+  });
   receiveStream.addTrack(track);
 }
 
