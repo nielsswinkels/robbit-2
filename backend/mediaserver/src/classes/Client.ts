@@ -114,7 +114,7 @@ export default class Client {
         case 'robotControl': {
           // console.log('robotControl message received!');
           if (!this.gathering) {
-            console.log('No gathering? Can not handle this robotControl message.')
+            console.log('No gathering? Can not handle this robotControl message.');
             break;
           }
           const roomId = msg.data.roomId;
@@ -123,7 +123,7 @@ export default class Client {
           // then find robot
           // then send message to robot
           if (!robot) {
-            console.log('Room has no robot. Can not control a robot if they are not there now can we?')
+            console.log('Room has no robot. Can not control a robot if they are not there now can we?');
             break;
           }
           const message = createMessage('robotControl', {
@@ -134,7 +134,7 @@ export default class Client {
         }
         default:
           console.warn('No message handlers implemented!!!');
-        break;
+          break;
       }
       return;
     }
@@ -415,7 +415,7 @@ export default class Client {
         break;
       }
       case 'joinRoomAsRobot': {
-        console.log('TRYING TO JOIN AS A ROOOOOBOOOOOT');
+        console.log('TRYING TO JOIN AS A ROBOT, bleep bleep');
         this.leaveCurrentRoom(false);
         let response: ResponseTo<'joinRoomAsRobot'>;
         try{
