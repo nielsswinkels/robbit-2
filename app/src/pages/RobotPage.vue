@@ -596,7 +596,7 @@ async function saveRoomName () {
 
 onBeforeUnmount(async () => {
   await stopVideoTracks();
-  peer.leaveRoom();
+  await peer.leaveRoom();
   peer.closeAndNotifyAllConsumers();
   peer.closeAndNotifyAllProducers();
 });
