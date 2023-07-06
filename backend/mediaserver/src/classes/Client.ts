@@ -1012,14 +1012,14 @@ export default class Client {
       }
       return;
     }
+    const roomId = this.room.id;
+    this.room.removeClient(this);
     this.closeAndNotifyAllConsumers();
     this.closeAndNotifyAllProducers();
     this.sendTransport?.close();
     this.sendTransport = undefined;
     this.receiveTransport?.close();
     this.receiveTransport = undefined;
-    const roomId = this.room.id;
-    this.room.removeClient(this);
     return roomId;
   }
 
