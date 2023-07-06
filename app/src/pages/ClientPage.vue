@@ -152,6 +152,25 @@
             </QItemSection>
           </QItem>
         </QExpansionItem>
+        <QSeparator />
+        <QExpansionItem>
+          <template #header>
+            <QItemSection avatar>
+              <QIcon
+                color="primary"
+                name="code"
+              />
+            </QItemSection>
+            <QItemSection>
+              Debug
+            </QItemSection>
+          </template>
+          <QItem>
+            <pre>
+              {{ soupStore.roomState }}
+            </pre>
+          </QItem>
+        </QExpansionItem>
       </QList>
     </QDrawer>
     <QDrawer
