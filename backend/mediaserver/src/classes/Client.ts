@@ -711,7 +711,7 @@ export default class Client {
             }
             case 'producer': {
               const producer = this.producers.get(msg.data.objectId);
-              if(!producer) throw new Error('no producer with that id found!!cant close it');
+              if(!producer) throw new Error('(notifyCloseEventRequest) no producer with that id found!!cant close it');
               producer.close();
               this.producers.delete(msg.data.objectId);
               response = createResponse('notifyCloseEventRequest', msg.id, { wasSuccess: true });
