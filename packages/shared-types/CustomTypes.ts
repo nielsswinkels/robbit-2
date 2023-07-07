@@ -18,6 +18,7 @@ export interface ClientProperties {
   handRaised?: boolean,
   forceMuted?: boolean,
   chatMsg?: string,
+  emojiFace?: string,
   [key: string]: unknown,
 }
 

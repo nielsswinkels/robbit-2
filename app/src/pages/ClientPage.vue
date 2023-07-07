@@ -376,6 +376,36 @@
         </div>
       </div>
       <div class="col-shrink column items-center">
+        <QFab
+          v-model="showEmojiPicker"
+          :color="(!videoEnabled?'primary':'')"
+          :outline="videoEnabled"
+          round
+          :icon="currentEmojiFace"
+          :active-icon="currentEmojiFace"
+          padding="9px"
+          direction="up"
+          class="fab-custom-icon fab-no-animation"
+        >
+          <template #tooltip>
+            <QTooltip>Välj emoji att visa som ansikte</QTooltip>
+          </template>
+          <QFabAction
+            v-for="(item, index) in emojiFaces"
+            :key="index"
+            color="primary"
+            :icon="emojiFaces[index]"
+            @click="chooseEmojiFace(emojiFaces[index])"
+            :label="(index+1)%10"
+            external-label
+            label-position="left"
+          />
+        </QFab>
+        <div class="col text-caption">
+          Ansikte
+        </div>
+      </div>
+      <div class="col-shrink column items-center">
         <QBtn
           id="raise-hand-button"
           icon="waving_hand"
@@ -747,6 +777,18 @@ const chatInputField = ref<HTMLInputElement>();
 const chatOpacity = ref<number>(50);
 const showChat = ref<boolean>(true);
 
+const currentEmojiFace = ref('🙂');
+const emojiFaces = ['🙂', '😁', '😎', '😍', '😂', '😮', '🙁', '😭', '😡', '😴'];
+const showEmojiPicker = ref(false);
+
+function chooseEmojiFace (chosenEmoji: string) {
+  console.log('Chosen emoji: ' + chosenEmoji);
+  currentEmojiFace.value = chosenEmoji;
+  peer.setCustomClientProperties({
+    emojiFace: currentEmojiFace.value,
+  });
+}
+
 function sendChat () {
   peer.setCustomClientProperties({
     chatMsg: chatInput.value,
@@ -863,6 +905,56 @@ function handleKeypress (event: KeyboardEvent) {
           break;
       }
     }
+  } else if (showEmojiPicker.value) {
+    if (event.type === 'keyup') {
+      switch (event.key) {
+        case 'e':
+        case 'E':
+        case 'Escape':
+          showEmojiPicker.value = false;
+          break;
+        case '0':
+          chooseEmojiFace(emojiFaces[9]);
+          showEmojiPicker.value = false;
+          break;
+        case '1':
+          chooseEmojiFace(emojiFaces[0]);
+          showEmojiPicker.value = false;
+          break;
+        case '2':
+          chooseEmojiFace(emojiFaces[1]);
+          showEmojiPicker.value = false;
+          break;
+        case '3':
+          chooseEmojiFace(emojiFaces[2]);
+          showEmojiPicker.value = false;
+          break;
+        case '4':
+          chooseEmojiFace(emojiFaces[3]);
+          showEmojiPicker.value = false;
+          break;
+        case '5':
+          chooseEmojiFace(emojiFaces[4]);
+          showEmojiPicker.value = false;
+          break;
+        case '6':
+          chooseEmojiFace(emojiFaces[5]);
+          showEmojiPicker.value = false;
+          break;
+        case '7':
+          chooseEmojiFace(emojiFaces[6]);
+          showEmojiPicker.value = false;
+          break;
+        case '8':
+          chooseEmojiFace(emojiFaces[7]);
+          showEmojiPicker.value = false;
+          break;
+        case '9':
+          chooseEmojiFace(emojiFaces[8]);
+          showEmojiPicker.value = false;
+          break;
+      }
+    }
   } else {
     if (event.type === 'keydown') {
       switch (event.key) {
@@ -944,9 +1036,9 @@ function handleKeypress (event: KeyboardEvent) {
           break;
         case 'e':
         case 'E':
-          // if (!showCamera) {
-          //   presentEmojiPopover(undefined);
-          // }
+          if (!videoEnabled.value) {
+            showEmojiPicker.value = !showEmojiPicker.value;
+          }
           break;
         case 'c':
         case 'C':
@@ -1258,4 +1350,13 @@ const screenshareWindowMode = ref('vr');
       background-color: $dark;
       border-bottom-right-radius: 2em;
     }
+
+    .fab-custom-icon .q-icon {
+      top: -3px;
+    }
+
+    .fab-no-animation .q-fab__icon, .fab-no-animation .q-fab__active-icon {
+      transition: none !important;
+    }
+
   </style>

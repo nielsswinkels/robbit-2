@@ -22,6 +22,12 @@
           name="waving_hand"
         />
         <div
+          v-if="!client.videoEnabled"
+          class="absolute-center text-h1"
+        >
+          {{ client.customProperties.emojiFace }}
+        </div>
+        <div
           class="absolute-bottom-right q-ma-xs"
         >
           <div
