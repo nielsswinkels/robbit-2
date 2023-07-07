@@ -7,7 +7,7 @@
       color="primary"
       outline
       rounded
-      label="Robbit"
+      label="Starta Robbit"
       @click="startRobbit"
       icon="smart_toy"
       icon-right="navigate_next"
@@ -25,9 +25,9 @@
       color="primary"
       outline
       rounded
-      label="Rumskontroll"
+      label="Robbit guide"
       :to="{name: 'controlLobby'}"
-      icon="room_preferences"
+      icon="support_agent"
       icon-right="navigate_next"
     />
     <QBtn
