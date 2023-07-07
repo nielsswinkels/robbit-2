@@ -209,6 +209,7 @@
           v-for="client in soupStore.roomState?.clients"
           :key="client.clientId"
         >
+          {{ client.customProperties.emojiFace }}
           {{ client.username }}
           {{ client.customProperties.chatMsg }}
           <template v-if="client.clientId === soupStore.clientState?.clientId">
@@ -1107,6 +1108,7 @@ onMounted(() => {
   robotControlIntervalId = setInterval(driveRobot, 300);
   window.addEventListener('keyup', handleKeypress);
   window.addEventListener('keydown', handleKeypress);
+  chooseEmojiFace(currentEmojiFace.value);
 });
 
 onUnmounted(() => {
