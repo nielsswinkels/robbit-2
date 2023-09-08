@@ -22,6 +22,27 @@
             </QBtn>
           </QItemSection>
         </QItem>
+        <!-- <QItem>
+          producerAudioTags
+          <pre>
+            {{ producerAudioTags }}
+          </pre>
+        </QItem>
+        <QItem>
+          consumedProducers
+          <pre>
+            {{ consumedProducers }}
+          </pre>
+        </QItem>
+        <QItem
+          v-for="(audioTag, index) in producerAudioTags"
+          :key="index"
+        >
+          {{ index }}:
+          <pre>
+            {{ audioTag.srcObject }}
+          </pre>
+        </QItem> -->
         <QItem
           v-for="client in clientsWithMuteState"
           :key="client.clientId"
@@ -41,6 +62,7 @@
                 :key="key"
               >
                 <audio
+                  v-if="producer.kind == 'audio'"
                   :ref="(el) => { producerAudioTags[producer.producerId] = el as HTMLAudioElement }"
                   autoplay
                 />
@@ -210,11 +232,17 @@ async function updateProducelistAndConsumeThem (producers: (typeof props.clients
     console.log('this producer was not conumsed. Adding it!');
     const { consumerId, track } = await peer.consume(producer.producerId);
     addedConsumedProducers[producer.producerId] = consumerId;
-    console.log('##### producer:');
+    console.log('producer:');
     console.log(producer);
     console.log('kind:' + producer.kind);
+    console.log('track:');
+    console.log(track);
     const mediaStream = new MediaStream([track]);
-    if (producer.kind === 'audio' && producerAudioTags.value[producer.producerId]) producerAudioTags.value[producer.producerId].srcObject = mediaStream;
+    if (producer.kind === 'audio' && producerAudioTags.value[producer.producerId]) {
+      console.log('Setting mediaStream as srcObject!!!!');
+      console.log(mediaStream);
+      producerAudioTags.value[producer.producerId].srcObject = mediaStream;
+    }
     if (producer.kind === 'video' && producerVideoTags.value[producer.producerId]) producerVideoTags.value[producer.producerId].srcObject = mediaStream;
   }
 
