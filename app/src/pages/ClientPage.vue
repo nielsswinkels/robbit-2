@@ -129,7 +129,7 @@
               <QToggle
                 v-model="showChat"
                 color="primary"
-                :label="(showChat? 'Visas' : 'Gömmd')"
+                :label="(showChat? 'Visas' : 'Gömd')"
               />
             </QItemSection>
           </QItem>
