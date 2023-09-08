@@ -4,6 +4,9 @@
     class=" client-grid-container window-height"
     :style="'grid-template-columns: repeat(' + clientsPerRow + ', 1fr); grid-template-rows: repeat(' + Math.ceil(Object.keys(clientsWithMuteState).length / clientsPerRow) + ', 1fr);'"
   >
+    // <pre>
+    //  {{ producerAudioTags }}
+    // </pre>
     <template
       v-for="client in clientsWithMuteState"
       :key="client.clientId"
