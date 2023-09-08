@@ -454,7 +454,9 @@
             :max="SERVO_MAX_VALUE"
             v-model="servoAngle"
             vertical
-            reverse
+            inner-track-color="primary"
+            thumb-color="primary"
+            color="grey"
           />
           <QIcon
             class="col-1 q-py-sm"
@@ -961,7 +963,7 @@ function handleKeypress (event: KeyboardEvent) {
       switch (event.key) {
         case 'ArrowUp':
           if (event.shiftKey) {
-            servoAngleChange.value = 1;
+            servoAngleChange.value = -1;
           } else {
             forwardActive = true;
             document.getElementById('forward-button')?.click();
@@ -969,7 +971,7 @@ function handleKeypress (event: KeyboardEvent) {
           break;
         case 'ArrowDown':
           if (event.shiftKey) {
-            servoAngleChange.value = -1;
+            servoAngleChange.value = 1;
           } else {
             reverseActive = true;
             document.getElementById('backward-button')?.click();
