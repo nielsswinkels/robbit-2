@@ -130,7 +130,7 @@ git clone https://github.com/nielsswinkels/robbit-2
 Now let's install and setup everything.
 cd into SCRIPT folder:
 ```
-cd inclubit-2/SCRIPT`
+cd robbit-2/SCRIPT`
 ```
 Make all the bash scripts in the folder executable (in case they're not).
 ```
@@ -155,7 +155,7 @@ Install the internal project dependencies and build the apps 📡
 ```
 ./install-dependencies.sh
 ```
-The script will tell you to manually setup autostart for PM2. Follow those instructions.
+The script will tell you to manually setup autostart for PM2. Follow those instructions. If you are a user with root access, it probably does not give you a command to run because it can already do it itself. In that case you will see a line near the end saying "Command successfully executed".
 
 
 Now let's initialize the database:
